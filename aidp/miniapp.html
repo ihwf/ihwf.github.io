@@ -1,0 +1,2052 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>题目质量检查助手</title>
+    <style>
+        /* CSS变量 - 扁平化配色方案 */
+        :root {
+            --primary-color: #3498db;
+            --primary-hover: #2980b9;
+            --secondary-color: #6c757d;
+            --secondary-hover: #5a6268;
+            --success-color: #28a745;
+            --success-hover: #218838;
+            --danger-color: #dc3545;
+            --danger-hover: #c82333;
+            --warning-color: #ffc107;
+            --warning-hover: #e0a800;
+            --info-color: #17a2b8;
+            --info-hover: #138496;
+            
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --bg-tertiary: #e9ecef;
+            
+            --text-primary: #212529;
+            --text-secondary: #6c757d;
+            --text-muted: #adb5bd;
+            
+            --border-color: #dee2e6;
+            --border-radius: 8px;
+            --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            --box-shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.12);
+            
+            --transition: all 0.3s ease;
+        }
+        
+        /* 全局样式重置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        /* 基础样式 */
+        body {
+            font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            font-size: 14px;
+        }
+        
+        /* 容器 */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* 标题样式 */
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--text-primary);
+            font-size: 2rem;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+        
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+        }
+        
+        h3 {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+        }
+        
+        /* 标签页样式 */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-color);
+            align-items: flex-end;
+        }
+        
+        .tabs::-webkit-scrollbar {
+            height: 4px;
+        }
+        
+        .tab-btn {
+            padding: 10px 20px;
+            border: none;
+            background-color: transparent;
+            color: var(--text-secondary);
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: var(--transition);
+            font-weight: 500;
+            position: relative;
+        }
+        
+        .tab-btn:hover {
+            color: var(--primary-color);
+            background-color: var(--bg-tertiary);
+        }
+        
+        .tab-btn.active {
+            color: var(--primary-color);
+            background-color: var(--bg-primary);
+        }
+        
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: var(--primary-color);
+            border-radius: 3px 3px 0 0;
+        }
+        
+        /* 添加配置按钮样式 */
+        .tab-btn:last-child {
+            border-radius: var(--border-radius);
+            margin-bottom: -1px;
+        }
+        
+        /* 主内容区布局 */
+        .main-content {
+            display: flex;
+            gap: 24px;
+            margin-top: 24px;
+            height: calc(100vh - 140px);
+        }
+        
+        /* 左侧面板 */
+        .left-panel {
+            flex: 2.5;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+            padding-right: 12px;
+        }
+        
+        /* 右侧面板 */
+        .right-panel {
+            flex: 1;
+            min-width: 300px;
+            overflow-y: auto;
+            padding-right: 12px;
+        }
+        
+        /* 通用卡片样式 */
+        .question-section, .result-section {
+            background-color: var(--bg-primary);
+            padding: 16px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+        }
+        
+        .question-section:hover, .result-section:hover {
+            box-shadow: var(--box-shadow-hover);
+        }
+        
+        /* 配置区域样式 */
+        .config-section {
+            background-color: var(--bg-primary);
+            padding: 0;
+            border-radius: var(--border-radius);
+            box-shadow: none;
+            margin: 0;
+        }
+        
+        /* 配置行样式 - 水平布局 */
+        .config-row {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 20px;
+            align-items: center;
+            flex-direction: row;
+        }
+        
+        /* 配置行样式 - 垂直布局（用于JSON配置） */
+        .config-row.vertical {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        /* 配置标签 */
+        .config-row label {
+            min-width: 100px;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+        
+        /* 配置输入框 */
+        .config-row input,
+        .config-row textarea,
+        .config-row select {
+            flex: 1;
+            width: auto;
+        }
+        
+        /* JSON配置特殊样式 */
+        .config-row.vertical textarea {
+            width: 100%;
+            flex: 1;
+            min-height: 400px;
+        }
+        
+        /* 表单元素样式 */
+        .config-row input, 
+        .config-row textarea, 
+        .config-row select,
+        .field-group input,
+        .field-group textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: var(--transition);
+            font-family: inherit;
+        }
+        
+        .field-group input,
+        .field-group textarea {
+            margin-top: 4px;
+        }
+        
+        .config-row input:focus, 
+        .config-row textarea:focus, 
+        .config-row select:focus,
+        .field-group input:focus,
+        .field-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+        
+        .config-row textarea,
+        .field-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        /* 按钮样式 */
+        .btn {
+            padding: 10px 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: var(--box-shadow);
+        }
+        
+        .btn:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: var(--box-shadow-hover);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        /* 按钮变体 */
+        .btn-secondary {
+            background-color: var(--secondary-color);
+        }
+        
+        .btn-secondary:hover {
+            background-color: var(--secondary-hover);
+        }
+        
+        .btn-success {
+            background-color: var(--success-color);
+        }
+        
+        .btn-success:hover {
+            background-color: var(--success-hover);
+        }
+        
+        .btn-danger {
+            background-color: var(--danger-color);
+        }
+        
+        .btn-danger:hover {
+            background-color: var(--danger-hover);
+        }
+        
+        /* 小按钮 */
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+        
+        /* 题目字段区域 */
+        .question-fields {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .field-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .field-group label {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+        
+        /* Bon配置区域样式 */
+        .bon-section {
+            margin-top: 8px;
+        }
+        
+        /* Bon标签页 */
+        .bon-tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 8px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .bon-tabs::-webkit-scrollbar {
+            height: 4px;
+        }
+        
+        .bon-tab-btn {
+            padding: 6px 16px;
+            border: none;
+            background-color: transparent;
+            color: var(--text-secondary);
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: var(--transition);
+            font-weight: 500;
+            position: relative;
+            font-size: 13px;
+        }
+        
+        .bon-tab-btn:hover {
+            color: var(--primary-color);
+            background-color: var(--bg-tertiary);
+        }
+        
+        .bon-tab-btn.qualified-tab {
+            color: var(--success-color);
+            border-bottom: 2px solid transparent;
+        }
+
+        .bon-tab-btn.unqualified-tab {
+            color: var(--danger-color);
+            border-bottom: 2px solid transparent;
+        }
+
+        .bon-tab-btn.active.qualified-tab {
+            background-color: rgba(40, 167, 69, 0.1);
+            border-bottom: 2px solid var(--success-color);
+        }
+
+        .bon-tab-btn.active.unqualified-tab {
+            background-color: rgba(220, 53, 69, 0.1);
+            border-bottom: 2px solid var(--danger-color);
+        }
+        
+        .bon-tab-btn.active::after {
+            display: none;
+        }
+        
+        /* Bon标签内容 */
+        .bon-tab-content {
+            background-color: var(--bg-secondary);
+            padding: 12px;
+            border-radius: var(--border-radius);
+            border: 2px solid var(--border-color); /* 加粗边框 */
+            transition: var(--transition);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05); /* 添加轻微阴影 */
+        }
+        
+        .bon-tab-content:hover {
+            box-shadow: var(--box-shadow);
+            border-color: var(--secondary-color); /* 悬停时边框颜色加深 */
+        }
+        
+        .bon-tab-content {
+            display: none;
+        }
+        
+        .bon-tab-content.active {
+            display: block;
+        }
+        
+        .bon-status {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        
+        /* 功能检查区域 */
+        .feature-checks {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .feature-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        /* 单选按钮样式 */
+        .bon-status label,
+        .feature-options label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 500;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: var(--transition);
+            padding: 2px 8px;
+            border-radius: var(--border-radius);
+            font-size: 12px;
+            border: 1px solid transparent;
+        }
+        
+        .bon-status label:hover,
+        .feature-options label:hover {
+            background-color: var(--bg-tertiary);
+        }
+        
+        /* 自定义单选按钮 */
+        input[type="radio"] {
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            position: relative;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        input[type="radio"]:checked {
+            border-color: var(--primary-color);
+            background-color: var(--bg-primary);
+        }
+        
+        input[type="radio"]:checked::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+        }
+        
+        input[type="radio"]:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+        
+        /* 功能检查区域 */
+        .feature-checks {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .feature-item {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 12px;
+            padding: 6px 8px;
+            border-bottom: 1px dashed var(--border-color);
+        }
+        
+        .feature-item:nth-child(odd) {
+            background-color: var(--bg-tertiary);
+            border-radius: 4px;
+        }
+        
+        .feature-item:last-child {
+            border-bottom: none;
+        }
+        
+        .feature-item strong {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 13px;
+            min-width: 80px;
+            width: 80px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .feature-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            flex: 1;
+        }
+        
+        /* 功能备注输入框 */
+        .feature-note {
+            margin-top: 0;
+            padding: 4px 8px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 12px;
+            transition: var(--transition);
+            resize: none;
+            overflow: hidden;
+            min-height: 28px;
+            height: 28px;
+            line-height: 1.4;
+            font-family: inherit;
+            width: 150px;
+        }
+        
+        .feature-note:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+            width: 250px;
+            position: relative;
+            z-index: 10;
+        }
+        
+        /* 结果区域 */
+        .result-section {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .result-item {
+            margin-bottom: 0;
+        }
+        
+        /* 标准结果项布局 */
+        .result-item-standard .result-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        
+        /* 紧凑结果项布局 */
+        .result-item-compact {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .result-item-compact .result-label {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            min-width: 100px;
+        }
+        
+        .result-item-compact .result-value {
+            background-color: var(--bg-secondary);
+            padding: 8px 12px;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.4;
+            color: var(--text-primary);
+            flex: 1;
+            min-height: 36px;
+            display: flex;
+            align-items: center;
+        }
+        
+        /* 紧凑结果项 - 特殊文本样式 */
+        .result-item-compact .result-value.special-text,
+        .result-item-compact.priority .result-value {
+            background-color: transparent;
+            padding: 0;
+            border: none;
+            border-radius: 0;
+            font-family: inherit;
+            font-weight: 500;
+        }
+        
+        /* 不合格bon序号样式 - 红色 */
+        .result-item-compact .result-value.special-text.red-text {
+            color: var(--danger-color);
+        }
+        
+        /* 紧凑结果项 - 特殊样式 */
+        .result-item-compact.qualified .result-value,
+        .result-item-compact.priority .result-value,
+        .result-item-compact .result-value.special-text {
+            background-color: transparent;
+            padding: 0;
+            border: none;
+            border-radius: 0;
+            font-family: inherit;
+            font-weight: 500;
+            min-height: 36px;
+            display: flex;
+            align-items: center;
+        }
+        
+        /* 紧凑结果项 - 特殊处理：追问query */
+        .result-item-compact.followup {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .result-item-compact.followup .result-label {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            min-width: 100px;
+        }
+        
+        .result-item-compact.followup .result-value {
+            background-color: transparent;
+            padding: 0;
+            border: none;
+            border-radius: 0;
+            font-family: inherit;
+            font-weight: 500;
+            min-height: 36px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .result-item-compact.followup .result-value.need-fill {
+            color: var(--success-color);
+        }
+        
+        .result-item-compact.followup .result-value.no-fill {
+            color: var(--danger-color);
+            text-decoration: line-through;
+        }
+        
+        /* 生成结果标题 */
+        .result-section h2 {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+        
+        /* bon状态标签 */
+        .bon-status-tags {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .bon-tag {
+            padding: 6px 12px;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            font-size: 14px;
+            transition: var(--transition);
+        }
+        
+        .bon-tag.unqualified {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: var(--danger-color);
+            border: 1px solid rgba(220, 53, 69, 0.2);
+        }
+        
+        .bon-tag.qualified {
+            background-color: rgba(40, 167, 69, 0.1);
+            color: var(--success-color);
+            border: 1px solid rgba(40, 167, 69, 0.2);
+        }
+        
+        /* 特殊文本颜色 */
+        .result-item-compact.qualified .result-value.yes {
+            color: var(--success-color);
+        }
+        
+        .result-item-compact.qualified .result-value.no {
+            color: var(--danger-color);
+        }
+        
+        .result-item-compact.priority .result-value.need-fill {
+            color: var(--success-color);
+        }
+        
+        .result-item-compact.priority .result-value.no-fill {
+            color: var(--danger-color);
+            text-decoration: line-through;
+        }
+        
+        .result-item-compact .result-value.special-text {
+            color: var(--info-color);
+        }
+        
+        .result-item label {
+            display: inline-block;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+        
+        .result-content {
+            background-color: var(--bg-secondary);
+            padding: 12px 16px;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+            min-height: 40px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            white-space: pre-wrap;
+            font-size: 14px;
+            line-height: 1.4;
+            color: var(--text-primary);
+        }
+        
+        .copy-btn {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+        
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+        
+        /* 模态框内容 */
+        .modal-content {
+            background-color: var(--bg-primary);
+            margin: 4% auto;
+            border-radius: var(--border-radius);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.16);
+            width: 90%;
+            max-width: 900px;
+            max-height: 85vh;
+            overflow-y: auto;
+            animation: modalSlideIn 0.3s ease;
+        }
+        
+        /* 模态框动画 */
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* 模态框头部 */
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--bg-primary);
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+        }
+        
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.25rem;
+            color: var(--text-primary);
+        }
+        
+        /* 关闭按钮 */
+        .close {
+            color: var(--text-muted);
+            font-size: 24px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background-color: transparent;
+            border: none;
+        }
+        
+        .close:hover,
+        .close:focus {
+            color: var(--text-primary);
+            background-color: var(--bg-tertiary);
+        }
+        
+        /* 模态框主体 */
+        .modal-body {
+            padding: 24px;
+        }
+        
+        /* JSON编辑器样式 */
+        #template-config {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            background-color: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            resize: vertical;
+            min-height: 250px;
+            tab-size: 2;
+            outline: none;
+            transition: var(--transition);
+        }
+        
+        #template-config:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+        
+        /* 滚动条样式 */
+        .left-panel::-webkit-scrollbar,
+        .right-panel::-webkit-scrollbar,
+        .modal-content::-webkit-scrollbar,
+        #template-config::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .left-panel::-webkit-scrollbar-track,
+        .right-panel::-webkit-scrollbar-track,
+        .modal-content::-webkit-scrollbar-track,
+        #template-config::-webkit-scrollbar-track {
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+        }
+        
+        .left-panel::-webkit-scrollbar-thumb,
+        .right-panel::-webkit-scrollbar-thumb,
+        .modal-content::-webkit-scrollbar-thumb,
+        #template-config::-webkit-scrollbar-thumb {
+            background: var(--text-muted);
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+        
+        .left-panel::-webkit-scrollbar-thumb:hover,
+        .right-panel::-webkit-scrollbar-thumb:hover,
+        .modal-content::-webkit-scrollbar-thumb:hover,
+        #template-config::-webkit-scrollbar-thumb:hover {
+            background: var(--text-secondary);
+        }
+        
+        /* 气泡提示样式 */
+        .toast {
+            position: fixed;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            padding: 12px 24px;
+            border-radius: var(--border-radius);
+            color: white;
+            font-weight: 500;
+            z-index: 10000;
+            opacity: 0;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            box-shadow: var(--box-shadow-hover);
+        }
+        
+        .toast.success {
+            background-color: var(--success-color);
+        }
+        
+        .toast.error {
+            background-color: var(--danger-color);
+        }
+        
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        
+        /* Firefox滚动条样式 */
+        .left-panel,
+        .right-panel,
+        .modal-content,
+        #template-config {
+            scrollbar-width: thin;
+            scrollbar-color: var(--text-muted) var(--bg-tertiary);
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 1024px) {
+            .main-content {
+                flex-direction: column;
+                height: auto;
+            }
+            
+            .right-panel {
+                min-width: auto;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 16px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .main-content {
+                gap: 16px;
+                margin-top: 16px;
+            }
+            
+            .question-section,
+            .result-section,
+            .bon-item {
+                padding: 16px;
+            }
+            
+            .question-fields {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            
+            .feature-checks {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            
+            .bon-status {
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .modal-content {
+                margin: 2% auto;
+                width: 95%;
+            }
+            
+            .modal-header,
+            .modal-body {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        
+        <!-- 标签页 -->
+        <div class="tabs" id="tabs">
+            <button class="tab-btn active" data-tab="default">默认模板</button>
+        </div>
+        
+        <div class="main-content">
+            <!-- 左侧内容区 -->
+            <div class="left-panel">
+                <!-- 题目处理区域 -->
+                <div class="question-section">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h2>题目处理</h2>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn" id="open-config-modal">模板配置</button>
+                            <button class="btn btn-secondary" id="clear-question-content">清空本题内容</button>
+                        </div>
+                    </div>
+                    <!-- Bon配置区域 -->
+                    <div class="bon-section" id="bon-section">
+                        <h3>Bon 配置</h3>
+                        <!-- Bon项将通过JavaScript动态生成 -->
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; margin-top: 16px;">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 配置弹框 -->
+            <div class="modal" id="config-modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>模板配置</h2>
+                        <span class="close">&times;</span>
+                    </div>
+                    <div class="modal-body">
+                        <div class="config-section">
+                                <div class="config-row">
+                                    <label for="template-name">模板名称</label>
+                                    <input type="text" id="template-name" placeholder="输入模板名称">
+                                </div>
+                                <div class="config-row">
+                                    <label for="template-desc">模板说明</label>
+                                    <input type="text" id="template-desc" placeholder="输入模板说明">
+                                </div>
+                                <div class="config-row vertical">
+                                    <label for="template-config">模板配置(JSON)</label>
+                                    <textarea id="template-config" placeholder='{
+  "bonFields": ["bon1", "bon2", "bon3"],
+  "features": {
+    "功能可用性": ["主要功能可用", "主要功能阻塞", "主要功能部分可用"],
+    "UI布局": ["UI布局合理", "UI布局混乱"],
+    "页面滑动": ["页面滑动正常", "页面滑动异常", "页面无需滑动可直接展示所有内容"]
+  }
+}'></textarea>
+                                </div>
+                            <div style="display: flex; gap: 10px;">
+                                <button class="btn" id="save-template">保存模板</button>
+                                <button class="btn btn-secondary" id="load-template">加载模板</button>
+                                <button class="btn btn-secondary" id="clear-template">清空配置</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 添加配置弹框 -->
+            <div class="modal" id="add-config-modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>添加配置</h2>
+                        <span class="close">&times;</span>
+                    </div>
+                    <div class="modal-body">
+                        <div class="config-section">
+                                <div class="config-row">
+                                    <label for="new-template-name">配置名称</label>
+                                    <input type="text" id="new-template-name" placeholder="输入配置名称">
+                                </div>
+                                <div class="config-row">
+                                    <label for="new-template-desc">配置说明</label>
+                                    <input type="text" id="new-template-desc" placeholder="输入配置说明">
+                                </div>
+                                <div class="config-row vertical">
+                                    <label for="new-template-config">配置内容(JSON)</label>
+                                    <textarea id="new-template-config" placeholder='{
+  "bonFields": ["bon1", "bon2", "bon3"],
+  "features": {
+    "功能可用性": ["主要功能可用", "主要功能阻塞", "主要功能部分可用"],
+    "UI布局": ["UI布局合理", "UI布局混乱"],
+    "页面滑动": ["页面滑动正常", "页面滑动异常", "页面无需滑动可直接展示所有内容"]
+  }
+}'></textarea>
+                                </div>
+                            <div style="display: flex; gap: 10px;">
+                                <button class="btn" id="add-template">添加配置</button>
+                                <button class="btn btn-secondary" id="clear-new-template">清空配置</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 右侧结果区 -->
+            <div class="right-panel">
+                <!-- 结果区域 -->
+            <div class="result-section">
+                <h2>生成结果 <span class="bon-status-tags" id="bon-status-tags"></span></h2>
+                <!-- 标准结果项 - 问题备注 -->
+                <div class="result-item result-item-standard">
+                    <div class="result-item-header">
+                        <label for="result-note">问题备注</label>
+                        <button class="btn btn-secondary copy-btn" onclick="copyToClipboard('result-note')">复制</button>
+                    </div>
+                    <div class="result-content" id="result-note"></div>
+                </div>
+                <!-- 紧凑结果项 - 偏序 -->
+                <div class="result-item result-item-compact priority-order">
+                    <span class="result-label">偏序</span>
+                    <div class="result-value" id="result-priority-order"></div>
+                    <button class="btn btn-secondary btn-sm" onclick="copyToClipboard('result-priority-order')" style="margin-left: 8px;">复制</button>
+                </div>
+                <!-- 紧凑结果项 - 不合格数据bon序号 -->
+                <div class="result-item result-item-compact">
+                    <span class="result-label">不合格数据bon序号</span>
+                    <div class="result-value special-text" id="result-unqualified"></div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 气泡提示元素 -->
+    <div class="toast" id="toast"></div>
+    
+    <script>
+        // 全局变量
+        let currentTemplate = 'exercise';
+        let templates = {
+            exercise: {
+                name: '做题模板',
+                desc: '通用做题模板 (Bon1-Bon5)',
+                config: {
+                    bonFields: ['bon1', 'bon2', 'bon3', 'bon4', 'bon5'],
+                    features: {
+                        'AI功能': ['AI功能不涉及', 'AI功能可用', 'AI功能不可用'],
+                        '主要功能': ['主要功能可用', '主要功能阻塞'],
+                        '游戏操作性': ['游戏操作性正常', '游戏操作性异常'],
+                        '页面滑动': ['不需要滑动页面容纳所有元素', '页面滑动正常', '页面滑动异常'],
+                        'UI布局': ['UI布局合理', 'UI布局混乱']
+                    }
+                }
+            }
+        };
+        
+        // 清空本题内容
+        function clearQuestionContent() {
+            try {
+                const config = JSON.parse(document.getElementById('template-config').value);
+                const bonFields = config.bonFields || [];
+                const features = config.features || {};
+                
+                // 重置所有Bon的状态为合格
+                bonFields.forEach(bon => {
+                    // 重置状态为合格
+                    const qualifiedRadio = document.querySelector(`input[name="${bon}-status"][value="合格"]`);
+                    if (qualifiedRadio) {
+                        qualifiedRadio.checked = true;
+                    }
+                    
+                    // 重置Bon标签样式
+                    updateBonTabStyle(bon, true);
+                    
+                    // 重置所有功能选项为默认值
+                    Object.keys(features).forEach(featureName => {
+                        // 找到默认值选项并选中
+                        const featureInputs = document.querySelectorAll(`input[name="${bon}-${featureName}"]`);
+                        featureInputs.forEach(input => {
+                            const option = input.value;
+                            if (featureName === '页面滑动' ? option.includes('不需要滑动') : (featureName === 'AI功能' ? option.includes('不涉及') : (option.includes('可用') || option.includes('合理') || option.includes('正常')))) {
+                                input.checked = true;
+                            } else {
+                                input.checked = false;
+                            }
+                        });
+                        
+                        // 清空备注
+                        const noteInput = document.querySelector(`textarea[data-bon="${bon}"][data-feature="${featureName}"]`);
+                        if (noteInput) {
+                            noteInput.value = '';
+                            autoResizeTextarea(noteInput);
+                        }
+                    });
+                });
+                
+                // 重置偏序UI
+                updatePriorityUI();
+                
+                // 重新生成结果
+                generateResult();
+                
+                showToast('已清空本题内容');
+                
+            } catch (e) {
+                console.error('清空本题内容失败：', e);
+                showToast('清空本题内容失败', 'error');
+            }
+        }
+        
+        // 绑定清空本题内容按钮事件
+        document.getElementById('clear-question-content').addEventListener('click', clearQuestionContent);
+        
+        // 初始化
+        function init() {
+            loadTemplates();
+            renderTabs();
+            loadTemplate(currentTemplate);
+            renderBonSection();
+            initModal();
+            initJsonEditor();
+        }
+        
+        // 初始化模态框
+        function initModal() {
+            // 现有模板配置模态框
+            const modal = document.getElementById('config-modal');
+            const openBtn = document.getElementById('open-config-modal');
+            const closeBtns = document.querySelectorAll('.close');
+            
+            // 新的添加配置模态框
+            const addModal = document.getElementById('add-config-modal');
+            
+            // 打开现有模态框
+            openBtn.addEventListener('click', () => {
+                modal.style.display = 'block';
+            });
+            
+            // 关闭所有模态框
+            closeBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    modal.style.display = 'none';
+                    addModal.style.display = 'none';
+                });
+            });
+            
+            // 点击模态框外部关闭
+            window.addEventListener('click', (event) => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                } else if (event.target === addModal) {
+                    addModal.style.display = 'none';
+                }
+            });
+            
+            // 按ESC键关闭模态框
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape') {
+                    if (modal.style.display === 'block') {
+                        modal.style.display = 'none';
+                    } else if (addModal.style.display === 'block') {
+                        addModal.style.display = 'none';
+                    }
+                }
+            });
+        }
+        
+        // 初始化JSON编辑器
+        function initJsonEditor() {
+            // 所有需要初始化的textarea
+            const textareas = [
+                document.getElementById('template-config'),
+                document.getElementById('new-template-config')
+            ];
+            
+            // 为每个textarea初始化JSON编辑器功能
+            textareas.forEach(textarea => {
+                if (!textarea) return;
+                
+                // 自动缩进
+                function handleTabKey(event) {
+                    if (event.key === 'Tab') {
+                        event.preventDefault();
+                        
+                        const start = textarea.selectionStart;
+                        const end = textarea.selectionEnd;
+                        const value = textarea.value;
+                        
+                        // 插入制表符
+                        textarea.value = value.substring(0, start) + '  ' + value.substring(end);
+                        textarea.selectionStart = textarea.selectionEnd = start + 2;
+                    }
+                }
+                
+                // 处理退格键
+                function handleBackspaceKey(event) {
+                    if (event.key === 'Backspace') {
+                        const start = textarea.selectionStart;
+                        const value = textarea.value;
+                        
+                        // 如果选中区域为空，且前两个字符是空格，则删除两个空格
+                        if (start === textarea.selectionEnd && value.substring(start - 2, start) === '  ') {
+                            event.preventDefault();
+                            textarea.value = value.substring(0, start - 2) + value.substring(start);
+                            textarea.selectionStart = textarea.selectionEnd = start - 2;
+                        }
+                    }
+                }
+                
+                // 处理换行键
+                function handleEnterKey(event) {
+                    if (event.key === 'Enter') {
+                        event.preventDefault();
+                        
+                        const start = textarea.selectionStart;
+                        const end = textarea.selectionEnd;
+                        const value = textarea.value;
+                        
+                        // 获取当前行的缩进
+                        const lineStart = value.lastIndexOf('\n', start - 1) + 1;
+                        const currentLine = value.substring(lineStart, start);
+                        const indentMatch = currentLine.match(/^\s*/);
+                        const currentIndent = indentMatch ? indentMatch[0] : '';
+                        
+                        // 检查是否需要增加缩进
+                        let newIndent = currentIndent;
+                        const beforeCursor = value.substring(start - 1, start);
+                        if (beforeCursor === '{' || beforeCursor === '[') {
+                            newIndent += '  ';
+                        }
+                        
+                        // 插入换行和缩进
+                        const afterCursor = value.substring(start, start + 1);
+                        let endIndent = currentIndent;
+                        if (afterCursor === '}' || afterCursor === ']') {
+                            endIndent = currentIndent.substring(0, currentIndent.length - 2);
+                        }
+                        
+                        textarea.value = value.substring(0, start) + '\n' + newIndent + value.substring(end);
+                        textarea.selectionStart = textarea.selectionEnd = start + 1 + newIndent.length;
+                    }
+                }
+                
+                // 格式化JSON
+                function formatJson() {
+                    try {
+                        const json = JSON.parse(textarea.value);
+                        textarea.value = JSON.stringify(json, null, 2);
+                    } catch (e) {
+                        showToast('JSON格式错误，无法格式化：' + e.message, 'error');
+                    }
+                }
+                
+                // 绑定事件
+                textarea.addEventListener('keydown', handleTabKey);
+                textarea.addEventListener('keydown', handleBackspaceKey);
+                textarea.addEventListener('keydown', handleEnterKey);
+            });
+            
+            // 添加现有模态框的格式化按钮
+            const formatBtn = document.createElement('button');
+            formatBtn.textContent = '格式化JSON';
+            formatBtn.className = 'btn btn-secondary';
+            formatBtn.style.marginLeft = '10px';
+            formatBtn.addEventListener('click', () => {
+                const textarea = document.getElementById('template-config');
+                try {
+                    const json = JSON.parse(textarea.value);
+                    textarea.value = JSON.stringify(json, null, 2);
+                } catch (e) {
+                    showToast('JSON格式错误，无法格式化：' + e.message, 'error');
+                }
+            });
+            
+            const saveBtn = document.getElementById('save-template');
+            saveBtn.parentNode.appendChild(formatBtn);
+            
+            // 添加新模态框的格式化按钮
+            const addFormatBtn = document.createElement('button');
+            addFormatBtn.textContent = '格式化JSON';
+            addFormatBtn.className = 'btn btn-secondary';
+            addFormatBtn.style.marginLeft = '10px';
+            addFormatBtn.addEventListener('click', () => {
+                const textarea = document.getElementById('new-template-config');
+                try {
+                    const json = JSON.parse(textarea.value);
+                    textarea.value = JSON.stringify(json, null, 2);
+                } catch (e) {
+                    showToast('JSON格式错误，无法格式化：' + e.message, 'error');
+                }
+            });
+            
+            const addBtn = document.getElementById('add-template');
+            addBtn.parentNode.appendChild(addFormatBtn);
+        }
+        
+        // 加载模板
+        function loadTemplates() {
+            const saved = localStorage.getItem('qualityCheckerTemplates');
+            if (saved) {
+                const savedTemplates = JSON.parse(saved);
+                // 合并保存的模板和默认模板，确保新增的模板能显示
+                templates = { ...templates, ...savedTemplates };
+                // 隐藏默认模板
+                if (templates.default) {
+                    delete templates.default;
+                }
+            }
+        }
+        
+        // 保存模板
+        function saveTemplates() {
+            localStorage.setItem('qualityCheckerTemplates', JSON.stringify(templates));
+        }
+        
+        // 渲染标签页
+        function renderTabs() {
+            const tabsContainer = document.getElementById('tabs');
+            tabsContainer.innerHTML = '';
+            
+            Object.keys(templates).forEach(tabName => {
+                const button = document.createElement('button');
+                button.className = `tab-btn ${tabName === currentTemplate ? 'active' : ''}`;
+                button.textContent = templates[tabName].name;
+                button.dataset.tab = tabName;
+                button.addEventListener('click', () => {
+                    switchTab(tabName);
+                });
+                tabsContainer.appendChild(button);
+            });
+            
+            // 添加配置按钮
+            const addConfigBtn = document.createElement('button');
+            addConfigBtn.className = 'tab-btn';
+            addConfigBtn.textContent = '+ 添加配置';
+            addConfigBtn.style.backgroundColor = 'var(--primary-color)';
+            addConfigBtn.style.color = 'white';
+            addConfigBtn.style.borderRadius = 'var(--border-radius)';
+            addConfigBtn.addEventListener('click', () => {
+                document.getElementById('add-config-modal').style.display = 'block';
+            });
+            tabsContainer.appendChild(addConfigBtn);
+        }
+        
+        // 切换标签页
+        function switchTab(tabName) {
+            currentTemplate = tabName;
+            renderTabs();
+            loadTemplate(tabName);
+            renderBonSection();
+        }
+        
+        // 加载模板配置
+        function loadTemplate(tabName) {
+            const template = templates[tabName];
+            if (template) {
+                document.getElementById('template-name').value = template.name;
+                document.getElementById('template-desc').value = template.desc;
+                document.getElementById('template-config').value = JSON.stringify(template.config, null, 2);
+            }
+        }
+        
+        // 保存模板
+        document.getElementById('save-template').addEventListener('click', () => {
+            const name = document.getElementById('template-name').value.trim();
+            const desc = document.getElementById('template-desc').value.trim();
+            const configStr = document.getElementById('template-config').value.trim();
+            
+            if (!name) {
+                showToast('请输入模板名称', 'error');
+                return;
+            }
+            
+            try {
+                const config = JSON.parse(configStr);
+                templates[currentTemplate] = {
+                    name: name,
+                    desc: desc,
+                    config: config
+                };
+                saveTemplates();
+                renderTabs();
+                showToast('模板保存成功');
+            } catch (e) {
+                showToast('JSON格式错误，请检查配置', 'error');
+            }
+        });
+        
+        // 清空配置
+        document.getElementById('clear-template').addEventListener('click', () => {
+            if (confirm('确定要清空当前配置吗？')) {
+                document.getElementById('template-name').value = '';
+                document.getElementById('template-desc').value = '';
+                document.getElementById('template-config').value = '';
+            }
+        });
+        
+        // 添加新配置
+        document.getElementById('add-template').addEventListener('click', () => {
+            const name = document.getElementById('new-template-name').value.trim();
+            const desc = document.getElementById('new-template-desc').value.trim();
+            const configStr = document.getElementById('new-template-config').value.trim();
+            
+            if (!name) {
+                showToast('请输入配置名称', 'error');
+                return;
+            }
+            
+            try {
+                const config = JSON.parse(configStr);
+                // 生成唯一ID作为模板键
+                const templateKey = 'template_' + Date.now();
+                // 添加新模板
+                templates[templateKey] = {
+                    name: name,
+                    desc: desc,
+                    config: config
+                };
+                saveTemplates();
+                renderTabs();
+                // 关闭模态框
+                document.getElementById('add-config-modal').style.display = 'none';
+                // 清空表单
+                document.getElementById('new-template-name').value = '';
+                document.getElementById('new-template-desc').value = '';
+                document.getElementById('new-template-config').value = '';
+                showToast('配置添加成功');
+            } catch (e) {
+                showToast('JSON格式错误，请检查配置', 'error');
+            }
+        });
+        
+        // 清空新配置
+        document.getElementById('clear-new-template').addEventListener('click', () => {
+            if (confirm('确定要清空当前配置吗？')) {
+                document.getElementById('new-template-name').value = '';
+                document.getElementById('new-template-desc').value = '';
+                document.getElementById('new-template-config').value = '';
+            }
+        });
+        
+        // 渲染Bon配置区域
+        function renderBonSection() {
+            const bonSection = document.getElementById('bon-section');
+            const configStr = document.getElementById('template-config').value;
+            
+            try {
+                const config = JSON.parse(configStr);
+                const bonFields = config.bonFields || [];
+                const features = config.features || {
+                    '功能可用性': ['主要功能可用', '主要功能阻塞', '主要功能部分可用'],
+                    'UI布局': ['UI布局合理', 'UI布局混乱'],
+                    '页面滑动': ['页面滑动正常', '页面滑动异常', '页面无需滑动可直接展示所有内容']
+                };
+                
+                // 清空当前内容
+                bonSection.innerHTML = `
+                    <div style="margin-bottom: 12px;">
+                        <h3 style="margin-bottom: 8px;">Bon 配置</h3>
+                        <div id="priority-settings" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                            <!-- 偏序设置将在这里动态生成 -->
+                        </div>
+                    </div>
+                `;
+                
+                if (bonFields.length === 0) {
+                    bonSection.innerHTML += '<p>没有配置Bon项</p>';
+                    return;
+                }
+                
+                // 生成标签页导航
+                const tabsContainer = document.createElement('div');
+                tabsContainer.className = 'bon-tabs';
+                
+                bonFields.forEach((bon, index) => {
+                    const tabBtn = document.createElement('button');
+                    // 默认状态为合格，所以添加qualified-tab类
+                    tabBtn.className = `bon-tab-btn qualified-tab ${index === 0 ? 'active' : ''}`;
+                    tabBtn.textContent = bon;
+                    tabBtn.dataset.bon = bon;
+                    tabBtn.id = `tab-btn-${bon}`;
+                    tabBtn.addEventListener('click', () => {
+                        switchBonTab(bon);
+                    });
+                    tabsContainer.appendChild(tabBtn);
+                });
+                
+                bonSection.appendChild(tabsContainer);
+                
+                // 生成标签内容区域
+                const contentContainer = document.createElement('div');
+                
+                bonFields.forEach((bon, index) => {
+                    const tabContent = document.createElement('div');
+                    tabContent.className = `bon-tab-content ${index === 0 ? 'active' : ''}`;
+                    tabContent.id = `${bon}-content`;
+                    tabContent.innerHTML = `
+                        <div class="bon-status">
+                            <label>
+                                <input type="radio" name="${bon}-status" value="合格" checked>
+                                合格
+                            </label>
+                            <label>
+                                <input type="radio" name="${bon}-status" value="不合格">
+                                不合格
+                            </label>
+                        </div>
+                        <div class="feature-checks" id="${bon}-features">
+                            ${Object.entries(features).map(([featureName, options]) => `
+                                <div class="feature-item">
+                                    <strong>${featureName}</strong>
+                                    <div class="feature-options">
+                                        ${options.map(option => `
+                                            <label>
+                                                <input type="radio" name="${bon}-${featureName}" value="${option}" ${(featureName === '页面滑动' ? option.includes('不需要滑动') : (featureName === 'AI功能' ? option.includes('不涉及') : (option.includes('可用') || option.includes('合理') || option.includes('正常')))) ? 'checked' : ''}>
+                                                ${option}
+                                            </label>
+                                        `).join('')}
+                                    </div>
+                                    <textarea class="feature-note" placeholder="添加备注" data-bon="${bon}" data-feature="${featureName}"></textarea>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                    contentContainer.appendChild(tabContent);
+                });
+                
+                bonSection.appendChild(contentContainer);
+                
+                // 添加实时渲染事件监听器
+                addBonEventListeners();
+                
+                // 初始化偏序UI
+                updatePriorityUI();
+                
+                // 初始生成结果
+                generateResult();
+                
+            } catch (e) {
+                bonSection.innerHTML = '<h3>Bon 配置</h3><p>配置格式错误，请检查JSON配置</p>';
+            }
+        }
+        
+        // 切换Bon标签页
+        function switchBonTab(bonName) {
+            // 更新标签页按钮状态
+            document.querySelectorAll('.bon-tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.bon === bonName) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // 更新标签内容状态
+            document.querySelectorAll('.bon-tab-content').forEach(content => {
+                content.classList.remove('active');
+                if (content.id === `${bonName}-content`) {
+                    content.classList.add('active');
+                }
+            });
+            
+            // 重新生成结果
+            generateResult();
+        }
+        
+        // 更新Bon标签样式
+        function updateBonTabStyle(bonName, isQualified) {
+            const tabBtn = document.getElementById(`tab-btn-${bonName}`);
+            if (tabBtn) {
+                if (isQualified) {
+                    tabBtn.classList.add('qualified-tab');
+                    tabBtn.classList.remove('unqualified-tab');
+                } else {
+                    tabBtn.classList.add('unqualified-tab');
+                    tabBtn.classList.remove('qualified-tab');
+                }
+            }
+        }
+
+        // 更新偏序设置UI
+        function updatePriorityUI() {
+            try {
+                const config = JSON.parse(document.getElementById('template-config').value);
+                const bonFields = config.bonFields || [];
+                const priorityContainer = document.getElementById('priority-settings');
+                
+                if (!priorityContainer) return;
+                
+                // 找出所有合格的Bon
+                const qualifiedBons = [];
+                bonFields.forEach(bon => {
+                    const statusRadios = document.querySelectorAll(`input[name="${bon}-status"]:checked`);
+                    const status = statusRadios[0]?.value || '合格';
+                    if (status === '合格') {
+                        qualifiedBons.push(bon);
+                    }
+                });
+                
+                // 如果没有合格的Bon，清空并隐藏
+                if (qualifiedBons.length === 0) {
+                    priorityContainer.innerHTML = '';
+                    priorityContainer.style.display = 'none';
+                    return;
+                }
+                
+                priorityContainer.style.display = 'flex';
+                
+                // 获取当前的偏序设置（如果已经有下拉框）
+                const currentSelects = priorityContainer.querySelectorAll('select');
+                const currentValues = Array.from(currentSelects).map(select => select.value);
+                
+                // 重新生成UI
+                let html = '<span style="font-weight:600; font-size:13px; color:var(--text-primary); margin-right: 5px;">可用bon偏序:</span>';
+                
+                // 计算需要几个下拉框
+                // 只有大于1个合格的bon才需要显示偏序，或者哪怕只有一个也显示出来方便查看
+                
+                qualifiedBons.forEach((_, index) => {
+                    html += `<div style="display:flex; align-items:center;">`;
+                    html += `<select class="priority-select" data-index="${index}" style="padding:2px 4px; border-radius:4px; border:1px solid var(--border-color); font-size:12px; width:70px; height:24px;">`;
+                    
+                    // 添加默认空选项
+                    html += `<option value="" selected disabled>请选择</option>`;
+                    
+                    // 动态生成选项
+                    qualifiedBons.forEach(bon => {
+                        html += `<option value="${bon}">${bon}</option>`;
+                    });
+                    html += `</select>`;
+                    html += `</div>`;
+                    
+                    if (index < qualifiedBons.length - 1) {
+                        html += '<span style="color:var(--text-muted); font-size:12px; font-weight:bold;">&gt;</span>';
+                    }
+                });
+                
+                priorityContainer.innerHTML = html;
+                
+                // 恢复之前的选择，或者设置默认值
+                const newSelects = priorityContainer.querySelectorAll('select');
+                
+                // 不再需要 updateOptions 函数，因为选项不再互斥
+                // 也不再需要监听 focus 事件
+
+                newSelects.forEach((select, index) => {
+                    // 尝试恢复之前的值
+                    if (index < currentValues.length && qualifiedBons.includes(currentValues[index])) {
+                         select.value = currentValues[index];
+                    } else {
+                        // 默认不选择，保持"请选择"状态
+                        select.value = "";
+                    }
+                    
+                    // 添加变更监听器
+                    select.addEventListener('change', () => {
+                        generateResult();
+                    });
+                });
+                
+            } catch (e) {
+                console.error('更新偏序UI失败', e);
+            }
+        }
+        
+        // 自动调整textarea高度
+        function autoResizeTextarea(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = Math.min(textarea.scrollHeight, 100) + 'px';
+        }
+        
+        // 为所有Bon相关元素添加事件监听器
+        function addBonEventListeners() {
+            // 为所有Bon状态单选按钮添加change事件监听器
+            document.querySelectorAll('.bon-status input[type="radio"]').forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    const bonName = e.target.name.split('-')[0];
+                    const isQualified = e.target.value === '合格';
+                    updateBonTabStyle(bonName, isQualified);
+                    updatePriorityUI();
+                    generateResult();
+                });
+            });
+            
+            // 为所有功能选项单选按钮添加change事件监听器
+            document.querySelectorAll('.feature-options input[type="radio"]').forEach(radio => {
+                radio.addEventListener('change', generateResult);
+            });
+            
+            // 为所有功能备注输入框添加事件监听器
+            document.querySelectorAll('.feature-note').forEach(textarea => {
+                // 初始化高度
+                autoResizeTextarea(textarea);
+                
+                // 添加输入事件监听器
+                textarea.addEventListener('input', () => {
+                    autoResizeTextarea(textarea);
+                    generateResult();
+                });
+            });
+        }
+        
+        // 生成结果
+        function generateResult() {
+            try {
+                const config = JSON.parse(document.getElementById('template-config').value);
+                const bonFields = config.bonFields || [];
+                const features = config.features || {};
+                
+                let resultNote = '';
+                let qualifiedBons = [];
+                let unqualifiedBons = [];
+                let bonScores = {};
+                
+                bonFields.forEach(bon => {
+                    // 获取状态
+                    const statusRadios = document.querySelectorAll(`input[name="${bon}-status"]:checked`);
+                    const status = statusRadios[0]?.value || '合格';
+                    
+                    // 获取各功能选项
+                    const featureResults = [];
+                    let score = 0;
+                    
+                    Object.keys(features).forEach(featureName => {
+                        const featureRadios = document.querySelectorAll(`input[name="${bon}-${featureName}"]:checked`);
+                        const featureValue = featureRadios[0]?.value || '';
+                        const noteInput = document.querySelector(`textarea[data-bon="${bon}"][data-feature="${featureName}"]`);
+                        const note = noteInput?.value.trim() || '';
+                        
+                        if (featureValue) {
+                            let featureResult;
+                            if (note) {
+                                featureResult = `[${featureValue}：${note}]`;
+                            } else {
+                                featureResult = `[${featureValue}]`;
+                            }
+                            featureResults.push(featureResult);
+                            
+                            // 计算分数
+                            if (featureValue.includes('可用') || featureValue.includes('合理') || featureValue.includes('正常')) {
+                                score += 10;
+                            } else if (featureValue.includes('部分可用')) {
+                                score += 5;
+                            } else if (featureValue.includes('阻塞') || featureValue.includes('混乱') || featureValue.includes('异常')) {
+                                score += 0;
+                            }
+                        }
+                    });
+                    
+                    // 生成单个Bon的备注
+                    let featureString = featureResults.join('。');
+                    if (featureString) {
+                        featureString = '。' + featureString;
+                    }
+                    resultNote += `${bon}:${status}。[使用链接:miniapp]${featureString}\n`;
+                    
+                    // 分类
+                    if (status === '合格') {
+                        qualifiedBons.push(bon);
+                    } else {
+                        unqualifiedBons.push(bon);
+                    }
+                    
+                    // 保存分数
+                    bonScores[bon] = score;
+                });
+                
+                // 生成结果
+                document.getElementById('result-note').textContent = resultNote.trim();
+                
+                // 三个bon都不合格才算不合格
+                const isUnqualified = unqualifiedBons.length === bonFields.length;
+                
+                // 设置是否合格
+                const qualifiedElement = document.getElementById('result-qualified');
+                if (qualifiedElement) {
+                    if (isUnqualified) {
+                        qualifiedElement.textContent = '否';
+                        qualifiedElement.className = 'result-value no';
+                    } else {
+                        qualifiedElement.textContent = '是';
+                        qualifiedElement.className = 'result-value yes';
+                    }
+                }
+                
+                // 合格数据bon偏序显示逻辑
+                const priorityElement = document.getElementById('result-bon-order');
+                if (priorityElement) {
+                    if (!isUnqualified) {
+                        // 合格时显示"需要填写！"
+                        priorityElement.className = 'result-value need-fill';
+                        priorityElement.textContent = '需要填写！';
+                    } else {
+                        // 不合格时显示"不要填写"并加删除线
+                        priorityElement.className = 'result-value no-fill';
+                        priorityElement.textContent = '不要填写';
+                    }
+                }
+                
+                // 生成新的偏序结果
+                const priorityOrderElement = document.getElementById('result-priority-order');
+                if (priorityOrderElement) {
+                    // 获取用户选择的偏序
+                    const prioritySelects = document.querySelectorAll('.priority-select');
+                    let orderedBons = [];
+                    
+                    if (prioritySelects.length > 0) {
+                        prioritySelects.forEach(select => {
+                            orderedBons.push(select.value);
+                        });
+                    } else {
+                        // 如果没有下拉框（可能是还没渲染或没有合格的），使用默认合格列表
+                        orderedBons = [...qualifiedBons];
+                    }
+                    
+                    // 提取数字或保留原名
+                    const formatBon = (bon) => {
+                        if (!bon) return ''; // 处理空值
+                        // 尝试提取bon后面的数字
+                        const match = bon.match(/bon(\d+)/i);
+                        if (match) {
+                            return match[1];
+                        }
+                        return bon;
+                    };
+                    
+                    const formattedQualified = orderedBons.map(formatBon).filter(v => v !== '');
+                    const formattedUnqualified = unqualifiedBons.map(formatBon);
+                    
+                    // 合并结果: 合格 > 不合格
+                    let resultParts = [...formattedQualified, ...formattedUnqualified];
+                    
+                    if (qualifiedBons.length === 0 && unqualifiedBons.length === bonFields.length) {
+                        // 五个bon都不合格，直接显示偏序（不合格的bon）
+                        // 根据需求：偏序字段，即使bon不合格也要加上去，把不合格bon加在偏序后面就行
+                        // 如果全部不合格，这里就只显示不合格的偏序
+                         priorityOrderElement.textContent = resultParts.join('>');
+                         priorityOrderElement.className = 'result-value';
+                    } else if (resultParts.length > 0) {
+                        // 移除所有空格
+                        priorityOrderElement.textContent = resultParts.join('>').replace(/\s/g, '');
+                        priorityOrderElement.className = 'result-value';
+                    } else {
+                        priorityOrderElement.textContent = '';
+                    }
+                }
+                
+                // 找出实现度最高的bon（用于不合格情况）
+                let bestBon = null;
+                let highestScore = -1;
+                bonFields.forEach(bon => {
+                    if (bonScores[bon] > highestScore) {
+                        highestScore = bonScores[bon];
+                        bestBon = bon;
+                    }
+                });
+                
+                // 设置不合格数据bon序号
+                const unqualifiedElement = document.getElementById('result-unqualified');
+                if (unqualifiedElement) {
+                    // 无论是否全部不合格，都显示所有不合格的bon序号，格式为bon1、bon2
+                    const unqualifiedBonsFormatted = unqualifiedBons.join('、');
+                    unqualifiedElement.textContent = unqualifiedBonsFormatted;
+                    unqualifiedElement.className = 'result-value special-text red-text';
+                }
+                
+                // 生成追问query，根据是否合格显示不同内容
+                const followupElement = document.getElementById('result-followup');
+                
+                if (followupElement) {
+                    if (isUnqualified) {
+                        // 不合格时显示"需要填写"
+                        followupElement.textContent = '需要填写';
+                        followupElement.className = 'result-value need-fill';
+                    } else {
+                        // 合格时显示"不要填写"并加删除线
+                        followupElement.textContent = '不要填写';
+                        followupElement.className = 'result-value no-fill';
+                    }
+                }
+                
+                // 在生成结果标题后面显示所有bon状态
+                const bonStatusTagsElement = document.getElementById('bon-status-tags');
+                let bonStatusHTML = '';
+                
+                bonFields.forEach(bon => {
+                    // 获取bon的状态
+                    const statusRadios = document.querySelectorAll(`input[name="${bon}-status"]:checked`);
+                    const status = statusRadios[0]?.value || '不合格';
+                    const isBonQualified = status === '合格';
+                    const bonClass = isBonQualified ? 'bon-tag qualified' : 'bon-tag unqualified';
+                    
+                    bonStatusHTML += `<span class="${bonClass}">${bon}</span>`;
+                });
+                
+                bonStatusTagsElement.innerHTML = bonStatusHTML;
+                
+            } catch (e) {
+                showToast('生成结果失败：' + e.message, 'error');
+            }
+        }
+        
+        // 显示气泡提示
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            
+            // 添加显示类
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 10);
+            
+            // 3秒后隐藏
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+        
+        // 复制到剪贴板
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            const text = element.textContent;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('已复制到剪贴板');
+            }).catch(err => {
+                console.error('复制失败：', err);
+                showToast('复制失败，请手动复制', 'error');
+            });
+        }
+        
+        // 清空配置
+        document.getElementById('clear-template').addEventListener('click', () => {
+            if (confirm('确定要清空当前配置吗？')) {
+                document.getElementById('template-name').value = '';
+                document.getElementById('template-desc').value = '';
+                document.getElementById('template-config').value = '';
+                renderBonSection();
+            }
+        });
+        
+        // 监听配置变化，实时更新Bon区域
+        document.getElementById('template-config').addEventListener('input', renderBonSection);
+        
+        // 初始化
+        init();
+    </script>
+</body>
+</html>
