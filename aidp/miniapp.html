@@ -54,8 +54,9 @@
         
         /* 容器 */
         .container {
-            margin: 0;
-            padding: 10px;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
         }
         
         /* 标题样式 */
@@ -86,6 +87,7 @@
         .tabs {
             display: flex;
             gap: 8px;
+            margin-bottom: 24px;
             overflow-x: auto;
             padding-bottom: 8px;
             border-bottom: 1px solid var(--border-color);
@@ -139,9 +141,9 @@
         /* 主内容区布局 */
         .main-content {
             display: flex;
-            gap: 10px;
-            margin-top: 10px;
-            height: calc(100vh - 78px);
+            gap: 24px;
+            margin-top: 24px;
+            height: calc(100vh - 140px);
         }
         
         /* 左侧面板 */
@@ -151,6 +153,7 @@
             flex-direction: column;
             gap: 16px;
             overflow-y: auto;
+            padding-right: 12px;
         }
         
         /* 右侧面板 */
@@ -158,6 +161,7 @@
             flex: 1;
             min-width: 300px;
             overflow-y: auto;
+            padding-right: 12px;
         }
         
         /* 通用卡片样式 */
@@ -425,6 +429,12 @@
             gap: 8px;
             margin-bottom: 10px;
         }
+
+        .bon-actions {
+            display: flex;
+            justify-content: flex-start;
+            margin-bottom: 8px;
+        }
         
         /* 功能检查区域 */
         .feature-checks {
@@ -453,6 +463,7 @@
             border-radius: var(--border-radius);
             font-size: 12px;
             border: 1px solid transparent;
+            white-space: nowrap;
         }
         
         .bon-status label:hover,
@@ -490,6 +501,40 @@
         }
         
         input[type="radio"]:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        input[type="checkbox"] {
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border: 2px solid var(--border-color);
+            border-radius: 3px;
+            position: relative;
+            cursor: pointer;
+            transition: var(--transition);
+            background-color: var(--bg-primary);
+        }
+
+        input[type="checkbox"]:checked {
+            border-color: var(--primary-color);
+            background-color: var(--primary-color);
+        }
+
+        input[type="checkbox"]:checked::after {
+            content: '';
+            position: absolute;
+            left: 3px;
+            top: 0;
+            width: 4px;
+            height: 8px;
+            border: solid #fff;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+
+        input[type="checkbox"]:focus {
             outline: none;
             box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
         }
@@ -561,6 +606,77 @@
             width: 250px;
             position: relative;
             z-index: 10;
+        }
+
+        .ai-special-options {
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+            margin-top: 2px;
+            padding-top: 6px;
+            border-top: 1px dashed var(--border-color);
+        }
+
+        .feature-item.ai-feature-item {
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+
+        .feature-item.ai-feature-item .feature-options {
+            flex: 1;
+            min-width: 420px;
+        }
+
+        .feature-item.ai-feature-item .ai-special-options {
+            flex-basis: 100%;
+            margin-left: 92px;
+        }
+
+        .ai-special-item {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding: 6px 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: var(--bg-secondary);
+        }
+
+        .ai-special-main {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-primary);
+            cursor: pointer;
+            width: fit-content;
+        }
+
+        .ai-special-detail {
+            display: none;
+            padding-left: 20px;
+        }
+
+        .ai-special-radios {
+            margin-bottom: 6px;
+        }
+
+        .ai-special-note {
+            width: 100%;
+            max-width: 420px;
+            padding: 4px 8px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 12px;
+            transition: var(--transition);
+        }
+
+        .ai-special-note:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
         }
         
         /* 结果区域 */
@@ -957,6 +1073,11 @@
                 font-size: 1.5rem;
             }
             
+            .main-content {
+                gap: 16px;
+                margin-top: 16px;
+            }
+            
             .question-section,
             .result-section,
             .bon-item {
@@ -995,7 +1116,7 @@
         
         <!-- 标签页 -->
         <div class="tabs" id="tabs">
-            <button class="tab-btn active" data-tab="default">默认模板</button>
+            <button class="tab-btn active" data-tab="latest_2026_02_24">2026-02-24题目模板（最新）</button>
         </div>
         
         <div class="main-content">
@@ -1095,6 +1216,28 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Bon内容填充弹框 -->
+            <div class="modal" id="bon-fill-modal">
+                <div class="modal-content" style="max-width: 520px;">
+                    <div class="modal-header">
+                        <h2>填充Bon内容</h2>
+                        <span class="close">&times;</span>
+                    </div>
+                    <div class="modal-body">
+                        <div class="config-section">
+                            <div class="config-row">
+                                <label for="fill-source-bon">选择来源Bon</label>
+                                <select id="fill-source-bon"></select>
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <button class="btn" id="confirm-fill-bon">确认填充</button>
+                                <button class="btn btn-secondary" id="cancel-fill-bon">取消</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             
             <!-- 右侧结果区 -->
             <div class="right-panel">
@@ -1110,7 +1253,7 @@
                     <div class="result-content" id="result-note"></div>
                 </div>
                 <!-- 紧凑结果项 - 偏序 -->
-                <div class="result-item result-item-compact priority-order">
+                <div class="result-item result-item-compact priority-order" id="result-priority-item">
                     <span class="result-label">偏序</span>
                     <div class="result-value" id="result-priority-order"></div>
                     <button class="btn btn-secondary btn-sm" onclick="copyToClipboard('result-priority-order')" style="margin-left: 8px;">复制</button>
@@ -1130,8 +1273,336 @@
     
     <script>
         // 全局变量
-        let currentTemplate = 'exercise';
+        const FIXED_TEMPLATE_KEY = 'latest_2026_02_24';
+        const FIXED_TEMPLATE = {
+            name: '2026-02-24题目模板（最新）',
+            desc: '三Bon做题模板（含AI功能专项检查）',
+            config: {
+                bonFields: ['bon1', 'bon2', 'bon3'],
+                features: {
+                    '主要功能': ['主要功能可用', '主要功能阻塞'],
+                    '本地存储功能': ['本地存储功能可用', '本地存储功能不可用', '本地存储功能不涉及'],
+                    '页面滑动': ['不需要滑动页面容纳所有元素', '页面滑动正常', '页面滑动异常'],
+                    '游戏操作性': ['隐藏', '游戏操作性正常', '游戏操作性异常'],
+                    'UI布局': ['UI布局合理', 'UI布局混乱'],
+                    'AI功能': ['AI功能不涉及', 'AI功能可用', 'AI功能不可用']
+                },
+                disablePriority: true,
+                aiSpecialChecks: [
+                    {
+                        key: 'llm',
+                        label: '产物需要调用llm（大语言模型）',
+                        options: ['存在callLlm response的响应', '不存在callLlm response的响应']
+                    },
+                    {
+                        key: 'vlm',
+                        label: '产物需要调用vlm模型（视觉语言模型）',
+                        options: ['存在callVlm response的响应数据', '不存在callVlm response的响应数据']
+                    },
+                    {
+                        key: 'seed_dream',
+                        label: '产物需要调用生图模型',
+                        options: ['存在callSeedDream response的响应数据', '不存在callSeedDream response的响应数据']
+                    },
+                    {
+                        key: 'third_party_api',
+                        label: '产物需要调用第三方API',
+                        options: ['存在callAPI response的响应数据', '不存在callAPI response的响应数据']
+                    },
+                    {
+                        key: 'deduplicate',
+                        label: '产物需要对生产结果去重',
+                        options: ['存在已经生成过的数据的列表来对模型进行提示', '不存在已经生成过的数据的列表来对模型进行提示']
+                    }
+                ]
+            }
+        };
+
+        function getFixedTemplate() {
+            return JSON.parse(JSON.stringify(FIXED_TEMPLATE));
+        }
+
+        function isDefaultFeatureOption(featureName, option) {
+            if (!option) return false;
+            if (featureName === '页面滑动') {
+                return option.includes('不需要滑动') || option.includes('无需滑动');
+            }
+            if (featureName === 'AI功能') {
+                return option.includes('不涉及');
+            }
+            return (option.includes('可用') && !option.includes('不可用')) || option.includes('合理') || option.includes('正常');
+        }
+
+        function getAiSpecialChecks(config) {
+            return Array.isArray(config.aiSpecialChecks) ? config.aiSpecialChecks : [];
+        }
+
+        function isPriorityDisabled(config) {
+            return Boolean(config && config.disablePriority);
+        }
+
+        function applyPriorityVisibility(config) {
+            const priorityResultItem = document.getElementById('result-priority-item');
+            if (priorityResultItem) {
+                priorityResultItem.style.display = isPriorityDisabled(config) ? 'none' : 'flex';
+            }
+        }
+
+        function renderAiSpecialOptions(bon, aiSpecialChecks) {
+            if (!aiSpecialChecks.length) return '';
+
+            return `
+                <div class="ai-special-options" data-bon="${bon}" style="display:none;">
+                    ${aiSpecialChecks.map((check, index) => {
+                        const key = check.key || `check_${index}`;
+                        const label = check.label || key;
+                        const options = Array.isArray(check.options) ? check.options : [];
+                        return `
+                            <div class="ai-special-item">
+                                <label class="ai-special-main">
+                                    <input type="checkbox" class="ai-special-checkbox" data-bon="${bon}" data-check-key="${key}" data-check-label="${label}">
+                                    <span>${label}</span>
+                                </label>
+                                <div class="ai-special-detail" data-bon="${bon}" data-check-key="${key}" style="display:none;">
+                                    <div class="feature-options ai-special-radios">
+                                        ${options.map((option, optionIndex) => `
+                                            <label>
+                                                <input type="radio" name="${bon}-ai-special-${key}" value="${option}" ${optionIndex === 0 ? 'checked' : ''} disabled>
+                                                ${option}
+                                            </label>
+                                        `).join('')}
+                                    </div>
+                                    <input type="text" class="ai-special-note" placeholder="添加备注" data-bon="${bon}" data-check-key="${key}" disabled>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        function updateAiSpecialDetailState(bon, checkKey, checked) {
+            const detail = document.querySelector(`.ai-special-detail[data-bon="${bon}"][data-check-key="${checkKey}"]`);
+            if (!detail) return;
+
+            detail.style.display = checked ? 'block' : 'none';
+
+            const radios = detail.querySelectorAll('input[type="radio"]');
+            radios.forEach((radio, index) => {
+                radio.disabled = !checked;
+                if (!checked) {
+                    radio.checked = index === 0;
+                }
+            });
+
+            if (checked && !detail.querySelector('input[type="radio"]:checked') && radios[0]) {
+                radios[0].checked = true;
+            }
+
+            const noteInput = detail.querySelector('.ai-special-note');
+            if (noteInput) {
+                noteInput.disabled = !checked;
+                if (!checked) {
+                    noteInput.value = '';
+                }
+            }
+        }
+
+        function updateAiSpecialVisibility(bon) {
+            const aiContainer = document.querySelector(`.ai-special-options[data-bon="${bon}"]`);
+            if (!aiContainer) return;
+
+            const selectedAIFeature = document.querySelector(`input[name="${bon}-AI功能"]:checked`)?.value || '';
+            const shouldShow = selectedAIFeature === 'AI功能可用' || selectedAIFeature === 'AI功能不可用';
+            aiContainer.style.display = shouldShow ? 'flex' : 'none';
+
+            if (!shouldShow) {
+                aiContainer.querySelectorAll('.ai-special-checkbox').forEach(checkbox => {
+                    checkbox.checked = false;
+                    updateAiSpecialDetailState(bon, checkbox.dataset.checkKey, false);
+                });
+            }
+        }
+
+        function getAiSpecialResultsForBon(bon) {
+            const aiContainer = document.querySelector(`.ai-special-options[data-bon="${bon}"]`);
+            if (!aiContainer) return [];
+
+            const results = [];
+            aiContainer.querySelectorAll('.ai-special-checkbox').forEach(checkbox => {
+                if (!checkbox.checked) return;
+
+                const checkKey = checkbox.dataset.checkKey;
+                const label = checkbox.dataset.checkLabel || '';
+                const selectedRadio = document.querySelector(`input[name="${bon}-ai-special-${checkKey}"]:checked`)?.value || '';
+                const note = document.querySelector(`.ai-special-note[data-bon="${bon}"][data-check-key="${checkKey}"]`)?.value.trim() || '';
+
+                let part = label;
+                if (selectedRadio) {
+                    part += `：${selectedRadio}`;
+                }
+                if (note) {
+                    part += `（${note}）`;
+                }
+                results.push(part);
+            });
+            return results;
+        }
+
+        function ensureFixedTemplateFirst() {
+            templates[FIXED_TEMPLATE_KEY] = getFixedTemplate();
+
+            const orderedTemplates = {
+                [FIXED_TEMPLATE_KEY]: templates[FIXED_TEMPLATE_KEY]
+            };
+            Object.keys(templates).forEach(key => {
+                if (key !== FIXED_TEMPLATE_KEY) {
+                    orderedTemplates[key] = templates[key];
+                }
+            });
+            templates = orderedTemplates;
+
+            if (!templates[currentTemplate]) {
+                currentTemplate = FIXED_TEMPLATE_KEY;
+            }
+        }
+
+        function setRadioByValue(name, value) {
+            if (!value) return false;
+            let matched = false;
+            document.querySelectorAll(`input[name="${name}"]`).forEach(radio => {
+                const isMatched = radio.value === value;
+                radio.checked = isMatched;
+                if (isMatched) {
+                    matched = true;
+                }
+            });
+            return matched;
+        }
+
+        function copyBonContent(sourceBon, targetBon) {
+            try {
+                if (!sourceBon || !targetBon || sourceBon === targetBon) {
+                    showToast('请选择不同的来源和目标Bon', 'error');
+                    return false;
+                }
+
+                const config = JSON.parse(document.getElementById('template-config').value);
+                const features = config.features || {};
+
+                const sourceStatus = document.querySelector(`input[name="${sourceBon}-status"]:checked`)?.value || '';
+                if (sourceStatus) {
+                    setRadioByValue(`${targetBon}-status`, sourceStatus);
+                    updateBonTabStyle(targetBon, sourceStatus === '合格');
+                }
+
+                Object.keys(features).forEach(featureName => {
+                    const sourceFeatureValue = document.querySelector(`input[name="${sourceBon}-${featureName}"]:checked`)?.value || '';
+                    if (sourceFeatureValue) {
+                        setRadioByValue(`${targetBon}-${featureName}`, sourceFeatureValue);
+                    }
+
+                    const sourceNote = document.querySelector(`textarea[data-bon="${sourceBon}"][data-feature="${featureName}"]`);
+                    const targetNote = document.querySelector(`textarea[data-bon="${targetBon}"][data-feature="${featureName}"]`);
+                    if (targetNote) {
+                        targetNote.value = sourceNote?.value || '';
+                        autoResizeTextarea(targetNote);
+                    }
+                });
+
+                updateAiSpecialVisibility(targetBon);
+
+                const sourceAiContainer = document.querySelector(`.ai-special-options[data-bon="${sourceBon}"]`);
+                const targetAiContainer = document.querySelector(`.ai-special-options[data-bon="${targetBon}"]`);
+                if (sourceAiContainer && targetAiContainer) {
+                    sourceAiContainer.querySelectorAll('.ai-special-checkbox').forEach(sourceCheckbox => {
+                        const checkKey = sourceCheckbox.dataset.checkKey;
+                        const targetCheckbox = targetAiContainer.querySelector(`.ai-special-checkbox[data-check-key="${checkKey}"]`);
+                        if (!targetCheckbox) return;
+
+                        targetCheckbox.checked = sourceCheckbox.checked;
+                        updateAiSpecialDetailState(targetBon, checkKey, sourceCheckbox.checked);
+
+                        if (sourceCheckbox.checked) {
+                            const sourceRadioValue = document.querySelector(`input[name="${sourceBon}-ai-special-${checkKey}"]:checked`)?.value || '';
+                            if (sourceRadioValue) {
+                                setRadioByValue(`${targetBon}-ai-special-${checkKey}`, sourceRadioValue);
+                            }
+
+                            const sourceAiNote = sourceAiContainer.querySelector(`.ai-special-note[data-check-key="${checkKey}"]`);
+                            const targetAiNote = targetAiContainer.querySelector(`.ai-special-note[data-check-key="${checkKey}"]`);
+                            if (targetAiNote) {
+                                targetAiNote.value = sourceAiNote?.value || '';
+                            }
+                        }
+                    });
+                }
+
+                updatePriorityUI();
+                generateResult();
+                showToast(`已将 ${sourceBon} 内容填充到 ${targetBon}`);
+                return true;
+            } catch (e) {
+                console.error('填充Bon内容失败：', e);
+                showToast('填充Bon内容失败', 'error');
+                return false;
+            }
+        }
+
+        function closeBonFillModal() {
+            const bonFillModal = document.getElementById('bon-fill-modal');
+            if (bonFillModal) {
+                bonFillModal.style.display = 'none';
+                bonFillModal.dataset.targetBon = '';
+            }
+        }
+
+        function openBonFillModal(targetBon) {
+            try {
+                const config = JSON.parse(document.getElementById('template-config').value);
+                const bonFields = config.bonFields || [];
+                const sourceSelect = document.getElementById('fill-source-bon');
+                const bonFillModal = document.getElementById('bon-fill-modal');
+
+                if (!sourceSelect || !bonFillModal) return;
+
+                sourceSelect.innerHTML = '';
+                let availableCount = 0;
+
+                bonFields.forEach(bon => {
+                    const option = document.createElement('option');
+                    option.value = bon;
+                    if (bon === targetBon) {
+                        option.textContent = `${bon}（当前）`;
+                        option.disabled = true;
+                    } else {
+                        option.textContent = bon;
+                        availableCount += 1;
+                    }
+                    sourceSelect.appendChild(option);
+                });
+
+                if (availableCount === 0) {
+                    showToast('没有可填充的其它Bon', 'error');
+                    return;
+                }
+
+                const firstAvailable = Array.from(sourceSelect.options).find(option => !option.disabled);
+                if (firstAvailable) {
+                    sourceSelect.value = firstAvailable.value;
+                }
+
+                bonFillModal.dataset.targetBon = targetBon;
+                bonFillModal.style.display = 'block';
+            } catch (e) {
+                console.error('打开填充Bon弹框失败：', e);
+                showToast('打开填充Bon弹框失败', 'error');
+            }
+        }
+
+        let currentTemplate = FIXED_TEMPLATE_KEY;
         let templates = {
+            [FIXED_TEMPLATE_KEY]: getFixedTemplate(),
             exercise: {
                 name: '做题模板',
                 desc: '通用做题模板 (Bon1-Bon5)',
@@ -1172,7 +1643,7 @@
                         const featureInputs = document.querySelectorAll(`input[name="${bon}-${featureName}"]`);
                         featureInputs.forEach(input => {
                             const option = input.value;
-                            if (featureName === '页面滑动' ? option.includes('不需要滑动') : (featureName === 'AI功能' ? option.includes('不涉及') : (option.includes('可用') || option.includes('合理') || option.includes('正常')))) {
+                            if (isDefaultFeatureOption(featureName, option)) {
                                 input.checked = true;
                             } else {
                                 input.checked = false;
@@ -1186,13 +1657,20 @@
                             autoResizeTextarea(noteInput);
                         }
                     });
+
+                    // 重置AI专项检查
+                    updateAiSpecialVisibility(bon);
                 });
                 
                 // 重置偏序UI
                 updatePriorityUI();
                 
-                // 重新生成结果
-                generateResult();
+                // 清空后自动切回第一个Bon标签
+                if (bonFields.length > 0) {
+                    switchBonTab(bonFields[0]);
+                } else {
+                    generateResult();
+                }
                 
                 showToast('已清空本题内容');
                 
@@ -1224,6 +1702,18 @@
             
             // 新的添加配置模态框
             const addModal = document.getElementById('add-config-modal');
+            const bonFillModal = document.getElementById('bon-fill-modal');
+            const confirmFillBonBtn = document.getElementById('confirm-fill-bon');
+            const cancelFillBonBtn = document.getElementById('cancel-fill-bon');
+            const fillSourceBonSelect = document.getElementById('fill-source-bon');
+
+            function closeAllModals() {
+                modal.style.display = 'none';
+                addModal.style.display = 'none';
+                if (bonFillModal) {
+                    bonFillModal.style.display = 'none';
+                }
+            }
             
             // 打开现有模态框
             openBtn.addEventListener('click', () => {
@@ -1233,10 +1723,23 @@
             // 关闭所有模态框
             closeBtns.forEach(btn => {
                 btn.addEventListener('click', () => {
-                    modal.style.display = 'none';
-                    addModal.style.display = 'none';
+                    closeAllModals();
                 });
             });
+
+            if (cancelFillBonBtn) {
+                cancelFillBonBtn.addEventListener('click', closeBonFillModal);
+            }
+
+            if (confirmFillBonBtn) {
+                confirmFillBonBtn.addEventListener('click', () => {
+                    const targetBon = bonFillModal?.dataset.targetBon || '';
+                    const sourceBon = fillSourceBonSelect?.value || '';
+                    if (copyBonContent(sourceBon, targetBon)) {
+                        closeBonFillModal();
+                    }
+                });
+            }
             
             // 点击模态框外部关闭
             window.addEventListener('click', (event) => {
@@ -1244,6 +1747,8 @@
                     modal.style.display = 'none';
                 } else if (event.target === addModal) {
                     addModal.style.display = 'none';
+                } else if (event.target === bonFillModal) {
+                    closeBonFillModal();
                 }
             });
             
@@ -1254,6 +1759,8 @@
                         modal.style.display = 'none';
                     } else if (addModal.style.display === 'block') {
                         addModal.style.display = 'none';
+                    } else if (bonFillModal && bonFillModal.style.display === 'block') {
+                        closeBonFillModal();
                     }
                 }
             });
@@ -1400,6 +1907,7 @@
                     delete templates.default;
                 }
             }
+            ensureFixedTemplateFirst();
         }
         
         // 保存模板
@@ -1546,14 +2054,19 @@
                     'UI布局': ['UI布局合理', 'UI布局混乱'],
                     '页面滑动': ['页面滑动正常', '页面滑动异常', '页面无需滑动可直接展示所有内容']
                 };
+                const disablePriority = isPriorityDisabled(config);
+                const aiSpecialChecks = getAiSpecialChecks(config);
+                applyPriorityVisibility(config);
                 
                 // 清空当前内容
                 bonSection.innerHTML = `
                     <div style="margin-bottom: 12px;">
                         <h3 style="margin-bottom: 8px;">Bon 配置</h3>
-                        <div id="priority-settings" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                            <!-- 偏序设置将在这里动态生成 -->
-                        </div>
+                        ${disablePriority ? '' : `
+                            <div id="priority-settings" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                                <!-- 偏序设置将在这里动态生成 -->
+                            </div>
+                        `}
                     </div>
                 `;
                 
@@ -1589,6 +2102,9 @@
                     tabContent.className = `bon-tab-content ${index === 0 ? 'active' : ''}`;
                     tabContent.id = `${bon}-content`;
                     tabContent.innerHTML = `
+                        <div class="bon-actions">
+                            <button type="button" class="btn btn-secondary btn-sm bon-copy-btn" data-target-bon="${bon}">填充其它bon内容</button>
+                        </div>
                         <div class="bon-status">
                             <label>
                                 <input type="radio" name="${bon}-status" value="合格" checked>
@@ -1600,20 +2116,26 @@
                             </label>
                         </div>
                         <div class="feature-checks" id="${bon}-features">
-                            ${Object.entries(features).map(([featureName, options]) => `
-                                <div class="feature-item">
-                                    <strong>${featureName}</strong>
-                                    <div class="feature-options">
-                                        ${options.map(option => `
-                                            <label>
-                                                <input type="radio" name="${bon}-${featureName}" value="${option}" ${(featureName === '页面滑动' ? option.includes('不需要滑动') : (featureName === 'AI功能' ? option.includes('不涉及') : (option.includes('可用') || option.includes('合理') || option.includes('正常')))) ? 'checked' : ''}>
-                                                ${option}
-                                            </label>
-                                        `).join('')}
+                            ${Object.entries(features).map(([featureName, options]) => {
+                                const optionList = Array.isArray(options) ? options : [];
+                                const showAiSpecialOptions = featureName === 'AI功能' && aiSpecialChecks.length > 0;
+                                const isAiFeature = featureName === 'AI功能';
+                                return `
+                                    <div class="feature-item ${isAiFeature ? 'ai-feature-item' : ''}">
+                                        <strong>${featureName}</strong>
+                                        <div class="feature-options">
+                                            ${optionList.map(option => `
+                                                <label>
+                                                    <input type="radio" name="${bon}-${featureName}" value="${option}" ${isDefaultFeatureOption(featureName, option) ? 'checked' : ''}>
+                                                    ${option}
+                                                </label>
+                                            `).join('')}
+                                        </div>
+                                        ${isAiFeature ? '' : `<textarea class="feature-note" placeholder="添加备注" data-bon="${bon}" data-feature="${featureName}"></textarea>`}
+                                        ${showAiSpecialOptions ? renderAiSpecialOptions(bon, aiSpecialChecks) : ''}
                                     </div>
-                                    <textarea class="feature-note" placeholder="添加备注" data-bon="${bon}" data-feature="${featureName}"></textarea>
-                                </div>
-                            `).join('')}
+                                `;
+                            }).join('')}
                         </div>
                     `;
                     contentContainer.appendChild(tabContent);
@@ -1623,9 +2145,13 @@
                 
                 // 添加实时渲染事件监听器
                 addBonEventListeners();
+
+                bonFields.forEach(bon => updateAiSpecialVisibility(bon));
                 
                 // 初始化偏序UI
-                updatePriorityUI();
+                if (!disablePriority) {
+                    updatePriorityUI();
+                }
                 
                 // 初始生成结果
                 generateResult();
@@ -1677,6 +2203,14 @@
                 const config = JSON.parse(document.getElementById('template-config').value);
                 const bonFields = config.bonFields || [];
                 const priorityContainer = document.getElementById('priority-settings');
+
+                if (isPriorityDisabled(config)) {
+                    if (priorityContainer) {
+                        priorityContainer.innerHTML = '';
+                        priorityContainer.style.display = 'none';
+                    }
+                    return;
+                }
                 
                 if (!priorityContainer) return;
                 
@@ -1764,6 +2298,13 @@
         
         // 为所有Bon相关元素添加事件监听器
         function addBonEventListeners() {
+            document.querySelectorAll('.bon-copy-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const targetBon = e.currentTarget.dataset.targetBon;
+                    openBonFillModal(targetBon);
+                });
+            });
+
             // 为所有Bon状态单选按钮添加change事件监听器
             document.querySelectorAll('.bon-status input[type="radio"]').forEach(radio => {
                 radio.addEventListener('change', (e) => {
@@ -1777,7 +2318,30 @@
             
             // 为所有功能选项单选按钮添加change事件监听器
             document.querySelectorAll('.feature-options input[type="radio"]').forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    const bonName = e.target.name.split('-')[0];
+                    if (e.target.name.endsWith('-AI功能')) {
+                        updateAiSpecialVisibility(bonName);
+                    }
+                    generateResult();
+                });
+            });
+
+            document.querySelectorAll('.ai-special-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', (e) => {
+                    const bonName = e.target.dataset.bon;
+                    const checkKey = e.target.dataset.checkKey;
+                    updateAiSpecialDetailState(bonName, checkKey, e.target.checked);
+                    generateResult();
+                });
+            });
+
+            document.querySelectorAll('.ai-special-detail input[type="radio"]').forEach(radio => {
                 radio.addEventListener('change', generateResult);
+            });
+
+            document.querySelectorAll('.ai-special-note').forEach(input => {
+                input.addEventListener('input', generateResult);
             });
             
             // 为所有功能备注输入框添加事件监听器
@@ -1799,6 +2363,7 @@
                 const config = JSON.parse(document.getElementById('template-config').value);
                 const bonFields = config.bonFields || [];
                 const features = config.features || {};
+                const disablePriority = isPriorityDisabled(config);
                 
                 let resultNote = '';
                 let qualifiedBons = [];
@@ -1819,24 +2384,37 @@
                         const featureValue = featureRadios[0]?.value || '';
                         const noteInput = document.querySelector(`textarea[data-bon="${bon}"][data-feature="${featureName}"]`);
                         const note = noteInput?.value.trim() || '';
-                        
-                        if (featureValue) {
-                            let featureResult;
-                            if (note) {
-                                featureResult = `[${featureValue}：${note}]`;
-                            } else {
-                                featureResult = `[${featureValue}]`;
+
+                        if (!featureValue) return;
+
+                        if (featureName === '游戏操作性' && featureValue === '隐藏') {
+                            return;
+                        }
+
+                        const detailParts = [];
+                        if (note) {
+                            detailParts.push(note);
+                        }
+
+                        if (featureName === 'AI功能' && (featureValue === 'AI功能可用' || featureValue === 'AI功能不可用')) {
+                            const aiSpecialResults = getAiSpecialResultsForBon(bon);
+                            if (aiSpecialResults.length > 0) {
+                                detailParts.push(aiSpecialResults.join('；'));
                             }
-                            featureResults.push(featureResult);
-                            
-                            // 计算分数
-                            if (featureValue.includes('可用') || featureValue.includes('合理') || featureValue.includes('正常')) {
-                                score += 10;
-                            } else if (featureValue.includes('部分可用')) {
-                                score += 5;
-                            } else if (featureValue.includes('阻塞') || featureValue.includes('混乱') || featureValue.includes('异常')) {
-                                score += 0;
-                            }
+                        }
+
+                        const featureResult = detailParts.length > 0
+                            ? `[${featureValue}：${detailParts.join('；')}]`
+                            : `[${featureValue}]`;
+                        featureResults.push(featureResult);
+
+                        // 计算分数
+                        if ((featureValue.includes('可用') && !featureValue.includes('不可用')) || featureValue.includes('合理') || featureValue.includes('正常')) {
+                            score += 10;
+                        } else if (featureValue.includes('部分可用')) {
+                            score += 5;
+                        } else if (featureValue.includes('阻塞') || featureValue.includes('混乱') || featureValue.includes('异常')) {
+                            score += 0;
                         }
                     });
                     
@@ -1893,6 +2471,10 @@
                 // 生成新的偏序结果
                 const priorityOrderElement = document.getElementById('result-priority-order');
                 if (priorityOrderElement) {
+                    if (disablePriority) {
+                        priorityOrderElement.textContent = '';
+                        priorityOrderElement.className = 'result-value';
+                    } else {
                     // 获取用户选择的偏序
                     const prioritySelects = document.querySelectorAll('.priority-select');
                     let orderedBons = [];
@@ -1935,6 +2517,7 @@
                         priorityOrderElement.className = 'result-value';
                     } else {
                         priorityOrderElement.textContent = '';
+                    }
                     }
                 }
                 
