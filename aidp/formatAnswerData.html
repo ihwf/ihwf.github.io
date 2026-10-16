@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>MGetAnswerList 节点答案查看器</title>
+        <style>
+            :root {
+                --bg: #f5f6fa;
+                --card-bg: #fff;
+                --border: #e4e7ed;
+                --text-main: #1d2129;
+                --text-sub: #4e5969;
+                --text-light: #86909c;
+                --primary: #165dff;
+                --qualified-bg: #e8ffea;
+                --qualified-text: #00b42a;
+                --unqualified-bg: #ffece8;
+                --unqualified-text: #f53f3f;
+                --defect-bg: #fff7e8;
+                --defect-text: #ff7d00;
+                --sidebar-width: 380px;
+            }
+            * {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+            body {
+                font-family:
+                    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+                    sans-serif;
+                background: var(--bg);
+                color: var(--text-main);
+                height: 100vh;
+                overflow: hidden;
+                display: flex;
+            }
+
+            /* ===== 左侧面板 ===== */
+            .sidebar {
+                width: var(--sidebar-width);
+                min-width: 320px;
+                max-width: 500px;
+                background: var(--card-bg);
+                border-right: 1px solid var(--border);
+                display: flex;
+                flex-direction: column;
+                padding: 20px;
+                gap: 12px;
+                flex-shrink: 0;
+                resize: horizontal;
+                overflow: auto;
+            }
+            .sidebar h1 {
+                font-size: 16px;
+                font-weight: 700;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 4px;
+            }
+            .sidebar h1::before {
+                content: '';
+                display: block;
+                width: 4px;
+                height: 18px;
+                background: var(--primary);
+                border-radius: 2px;
+            }
+            textarea {
+                flex: 1;
+                min-height: 200px;
+                resize: none;
+                padding: 12px;
+                font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+                font-size: 13px;
+                line-height: 1.5;
+                border: 1px solid var(--border);
+                border-radius: 6px;
+                outline: none;
+                background: #fafbfc;
+                transition:
+                    border-color 0.2s,
+                    background 0.2s;
+            }
+            textarea:focus {
+                border-color: var(--primary);
+                background: #fff;
+            }
+            .btn-row {
+                display: flex;
+                gap: 8px;
+                flex-wrap: wrap;
+            }
+            button {
+                padding: 9px 18px;
+                background: var(--primary);
+                color: #fff;
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 14px;
+                transition: all 0.2s;
+                white-space: nowrap;
+            }
+            button:hover {
+                opacity: 0.9;
+            }
+            button:active {
+                transform: scale(0.97);
+            }
+            button.sec {
+                background: #fff;
+                color: var(--text-sub);
+                border: 1px solid var(--border);
+            }
+            button.sec:hover {
+                background: #f7f8fa;
+            }
+            .status {
+                font-size: 12px;
+                line-height: 1.5;
+                word-break: break-word;
+                min-height: 18px;
+            }
+            .status.err {
+                color: #f53f3f;
+            }
+            .hint {
+                font-size: 11px;
+                color: var(--text-light);
+                line-height: 1.5;
+            }
+
+            /* ===== 右侧内容区 ===== */
+            .main {
+                flex: 1;
+                overflow-y: auto;
+                padding: 24px 28px;
+            }
+            .topic-group {
+                margin-bottom: 28px;
+            }
+            .topic-title {
+                font-size: 16px;
+                font-weight: 700;
+                margin-bottom: 12px;
+                padding-bottom: 8px;
+                border-bottom: 2px solid var(--primary);
+                display: inline-block;
+            }
+            .node-card {
+                background: var(--card-bg);
+                border: 1px solid var(--border);
+                border-radius: 8px;
+                padding: 14px 16px;
+                margin-bottom: 10px;
+                transition: box-shadow 0.2s;
+            }
+            .node-card:hover {
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            }
+            .node-name {
+                font-size: 14px;
+                font-weight: 600;
+                margin-bottom: 10px;
+                color: var(--text-main);
+            }
+            .field-row {
+                display: flex;
+                align-items: baseline;
+                margin-bottom: 6px;
+                font-size: 13px;
+            }
+            .field-label {
+                color: var(--text-light);
+                min-width: 70px;
+                flex-shrink: 0;
+            }
+            .field-value {
+                color: var(--text-sub);
+                word-break: break-word;
+            }
+
+            .tag {
+                display: inline-block;
+                padding: 1px 10px;
+                border-radius: 10px;
+                font-size: 12px;
+                font-weight: 600;
+            }
+            .tag.qualified {
+                background: var(--qualified-bg);
+                color: var(--qualified-text);
+            }
+            .tag.unqualified {
+                background: var(--unqualified-bg);
+                color: var(--unqualified-text);
+            }
+            .tag.defect {
+                background: var(--defect-bg);
+                color: var(--defect-text);
+            }
+            .tag.unknown {
+                background: #f2f3f5;
+                color: var(--text-light);
+            }
+
+            .issue-tags {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 4px;
+            }
+            .issue-tag {
+                display: inline-block;
+                padding: 1px 8px;
+                border-radius: 4px;
+                font-size: 12px;
+                background: #f2f3f5;
+                color: var(--text-sub);
+            }
+
+            .empty {
+                text-align: center;
+                padding: 80px 20px;
+                color: var(--text-light);
+                font-size: 14px;
+            }
+            .parse-warn {
+                font-size: 12px;
+                color: #ff7d00;
+                margin-top: 4px;
+            }
+
+            @media (max-width: 768px) {
+                body {
+                    flex-direction: column;
+                    height: auto;
+                    overflow: auto;
+                }
+                .sidebar {
+                    width: 100%;
+                    max-width: none;
+                    min-width: 0;
+                    border-right: none;
+                    border-bottom: 1px solid var(--border);
+                    resize: none;
+                }
+                textarea {
+                    min-height: 120px;
+                    flex: none;
+                }
+                .main {
+                    padding: 16px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <!-- 左侧：输入与操作 -->
+        <div class="sidebar">
+            <h1>节点答案查看器</h1>
+            <textarea
+                id="jsonInput"
+                placeholder="点击「粘贴并展示」自动读取剪贴板&#10;或手动粘贴 / 输入 JSON，内容变化后自动解析..."
+            ></textarea>
+            <div class="btn-row">
+                <button id="pasteBtn" onclick="pasteAndRender()">
+                    📋 粘贴并展示
+                </button>
+                <button class="sec" onclick="clearAll()">清空</button>
+            </div>
+            <div id="statusEl" class="status"></div>
+            <div class="hint">
+                💡 输入框内容变化后自动解析<br />🖱️ 拖拽右边缘可调整左侧宽度
+            </div>
+        </div>
+
+        <!-- 右侧：结果展示 -->
+        <div class="main" id="output">
+            <div class="empty">等待粘贴数据...</div>
+        </div>
+
+        <script>
+            const QUALIFIED_MAP = {
+                qualified: { label: '合格', cls: 'qualified' },
+                unqualified: { label: '不合格', cls: 'unqualified' },
+                defect: { label: '瑕疵', cls: 'defect' }
+            }
+
+            // ========== 防抖：避免粘贴大JSON时频繁触发中间态解析 ==========
+            let debounceTimer = null
+            document
+                .getElementById('jsonInput')
+                .addEventListener('input', () => {
+                    clearTimeout(debounceTimer)
+                    debounceTimer = setTimeout(parseAndRender, 150)
+                })
+
+            // ========== 粘贴并展示（从剪贴板读取） ==========
+            async function pasteAndRender() {
+                const inputEl = document.getElementById('jsonInput')
+                const statusEl = document.getElementById('statusEl')
+                const btn = document.getElementById('pasteBtn')
+
+                try {
+                    if (!navigator.clipboard || !navigator.clipboard.readText) {
+                        throw new Error('当前环境不支持 Clipboard API')
+                    }
+                    const text = await navigator.clipboard.readText()
+                    if (!text || !text.trim()) {
+                        statusEl.textContent = '⚠️ 剪贴板为空'
+                        statusEl.className = 'status err'
+                        return
+                    }
+                    // 赋值会触发 input 事件，经防抖后自动解析，无需手动调用 parseAndRender
+                    inputEl.value = text.trim()
+                    // 手动触发一次 input 事件确保立即解析（绕过防抖延迟）
+                    inputEl.dispatchEvent(new Event('input'))
+
+                    btn.textContent = '✅ 已粘贴'
+                    setTimeout(() => {
+                        btn.textContent = '📋 粘贴并展示'
+                    }, 800)
+                } catch (e) {
+                    statusEl.textContent = `⚠️ 无法读取剪贴板（${e.message}）\n请手动 Ctrl+V 粘贴，内容会自动解析`
+                    statusEl.className = 'status err'
+                    inputEl.focus()
+                }
+            }
+
+            // ========== 解析并渲染 ==========
+            function parseAndRender() {
+                const raw = document.getElementById('jsonInput').value.trim()
+                const statusEl = document.getElementById('statusEl')
+                const outputEl = document.getElementById('output')
+
+                if (!raw) {
+                    outputEl.innerHTML =
+                        '<div class="empty">等待粘贴数据...</div>'
+                    statusEl.textContent = ''
+                    statusEl.className = 'status'
+                    return
+                }
+
+                try {
+                    const json = JSON.parse(raw)
+                    const answerList =
+                        json.AnswerList ||
+                        json.data?.AnswerList ||
+                        json.Result?.AnswerList ||
+                        json
+
+                    if (
+                        typeof answerList !== 'object' ||
+                        Array.isArray(answerList)
+                    ) {
+                        throw new Error(
+                            '未找到有效的 AnswerList 对象（期望格式: {题目id: [节点数组]}）'
+                        )
+                    }
+
+                    const topicIds = Object.keys(answerList)
+                    if (topicIds.length === 0) {
+                        outputEl.innerHTML =
+                            '<div class="empty">AnswerList 为空</div>'
+                        statusEl.textContent = ''
+                        return
+                    }
+
+                    let html = ''
+                    let totalNodes = 0
+                    let parseErrors = 0
+
+                    topicIds.forEach((topicId) => {
+                        const nodes = answerList[topicId]
+                        if (!Array.isArray(nodes)) return
+
+                        let nodesHtml = ''
+                        nodes.forEach((node) => {
+                            totalNodes++
+                            const nodeName = node.NodeName || '未命名节点'
+                            let parsed = null
+                            let warnMsg = ''
+
+                            try {
+                                if (typeof node.NodeAnswer === 'string') {
+                                    parsed = JSON.parse(node.NodeAnswer)
+                                } else if (
+                                    typeof node.NodeAnswer === 'object' &&
+                                    node.NodeAnswer !== null
+                                ) {
+                                    parsed = node.NodeAnswer
+                                }
+                            } catch (e) {
+                                parseErrors++
+                                warnMsg = `NodeAnswer 解析失败: ${e.message}`
+                            }
+
+                            const data = parsed?.data || parsed?.Data || {}
+                            const isQualified = String(
+                                data.isQualified || data.IsQualified || ''
+                            ).toLowerCase()
+                            const issueTypes =
+                                data.issueTypes || data.IssueTypes || []
+                            const remark = data.remark || data.Remark || ''
+
+                            const qInfo = QUALIFIED_MAP[isQualified] || {
+                                label: isQualified || '未知',
+                                cls: 'unknown'
+                            }
+                            const issuesHtml =
+                                Array.isArray(issueTypes) &&
+                                issueTypes.length > 0
+                                    ? `<div class="issue-tags">${issueTypes.map((t) => `<span class="issue-tag">${escapeHtml(String(t))}</span>`).join('')}</div>`
+                                    : '<span style="color:var(--text-light)">-</span>'
+
+                            nodesHtml += `
+                    <div class="node-card">
+                        <div class="node-name">${escapeHtml(nodeName)}</div>
+                        <div class="field-row">
+                            <span class="field-label">是否合格</span>
+                            <span class="tag ${qInfo.cls}">${escapeHtml(qInfo.label)}</span>
+                        </div>
+                        <div class="field-row">
+                            <span class="field-label">问题类型</span>
+                            <span class="field-value">${issuesHtml}</span>
+                        </div>
+                        <div class="field-row">
+                            <span class="field-label">理由</span>
+                            <span class="field-value">${remark ? escapeHtml(remark) : '<span style="color:var(--text-light)">-</span>'}</span>
+                        </div>
+                        ${warnMsg ? `<div class="parse-warn">⚠️ ${escapeHtml(warnMsg)}</div>` : ''}
+                    </div>`
+                        })
+
+                        if (nodesHtml) {
+                            html += `
+                    <div class="topic-group">
+                        <div class="topic-title">题目 ${escapeHtml(topicId)}</div>
+                        ${nodesHtml}
+                    </div>`
+                        }
+                    })
+
+                    outputEl.innerHTML =
+                        html || '<div class="empty">无有效节点数据</div>'
+                    let msg = `✅ ${topicIds.length} 个题目，${totalNodes} 个节点`
+                    if (parseErrors > 0)
+                        msg += `\n⚠️ ${parseErrors} 个NodeAnswer解析失败`
+                    statusEl.textContent = msg
+                    statusEl.className = 'status'
+                } catch (e) {
+                    // 输入过程中JSON不完整是正常现象，仅在内容非空时提示错误
+                    statusEl.textContent = `❌ ${e.message}`
+                    statusEl.className = 'status err'
+                    outputEl.innerHTML = ''
+                }
+            }
+
+            function escapeHtml(str) {
+                const d = document.createElement('div')
+                d.textContent = str
+                return d.innerHTML
+            }
+
+            function clearAll() {
+                const inputEl = document.getElementById('jsonInput')
+                inputEl.value = ''
+                // 清空后触发 input 事件，让 parseAndRender 重置右侧为初始状态
+                inputEl.dispatchEvent(new Event('input'))
+            }
+        </script>
+    </body>
+</html>
