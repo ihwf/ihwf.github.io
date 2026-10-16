@@ -13,12 +13,7 @@
                 --text-sub: #4e5969;
                 --text-light: #86909c;
                 --primary: #165dff;
-                --qualified-bg: #e8ffea;
-                --qualified-text: #00b42a;
-                --unqualified-bg: #ffece8;
-                --unqualified-text: #f53f3f;
-                --defect-bg: #fff7e8;
-                --defect-text: #ff7d00;
+                --primary-light: #e8f3ff;
                 --sidebar-width: 380px;
             }
             * {
@@ -140,12 +135,12 @@
                 padding: 24px 28px;
             }
             .topic-group {
-                margin-bottom: 28px;
+                margin-bottom: 32px;
             }
             .topic-title {
                 font-size: 16px;
                 font-weight: 700;
-                margin-bottom: 12px;
+                margin-bottom: 14px;
                 padding-bottom: 8px;
                 border-bottom: 2px solid var(--primary);
                 display: inline-block;
@@ -153,72 +148,140 @@
             .node-card {
                 background: var(--card-bg);
                 border: 1px solid var(--border);
-                border-radius: 8px;
-                padding: 14px 16px;
-                margin-bottom: 10px;
+                border-radius: 10px;
+                padding: 18px 20px;
+                margin-bottom: 14px;
                 transition: box-shadow 0.2s;
             }
             .node-card:hover {
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+                box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
             }
             .node-name {
-                font-size: 14px;
-                font-weight: 600;
-                margin-bottom: 10px;
+                font-size: 15px;
+                font-weight: 700;
+                margin-bottom: 16px;
                 color: var(--text-main);
             }
-            .field-row {
+
+            /* ===== 分组标题 ===== */
+            .section-title {
+                font-size: 12px;
+                font-weight: 700;
+                color: var(--primary);
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                margin: 16px 0 10px;
                 display: flex;
-                align-items: baseline;
+                align-items: center;
+                gap: 6px;
+            }
+            .section-title:first-of-type {
+                margin-top: 0;
+            }
+            .section-title::after {
+                content: '';
+                flex: 1;
+                height: 1px;
+                background: var(--border);
+            }
+
+            /* ===== ✨ 维度评估网格布局 ===== */
+            .dim-grid {
+                display: grid;
+                gap: 10px;
+            }
+            .dim-item {
+                background: #fafbfc;
+                border: 1px solid var(--border);
+                border-radius: 8px;
+                padding: 12px 14px;
+                transition:
+                    border-color 0.2s,
+                    background 0.2s;
+            }
+            .dim-item:hover {
+                border-color: #c9cdd4;
+                background: #f5f6fa;
+            }
+            .dim-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
                 margin-bottom: 6px;
-                font-size: 13px;
             }
-            .field-label {
+            .dim-label {
+                font-size: 12px;
                 color: var(--text-light);
-                min-width: 70px;
-                flex-shrink: 0;
+                font-weight: 500;
             }
-            .field-value {
+            .dim-value {
+                font-size: 13px;
+                font-weight: 700;
+                color: var(--text-main);
+                word-break: break-word;
+                text-align: right;
+                max-width: 60%;
+            }
+            .dim-value.na {
+                color: var(--text-light);
+                font-weight: 400;
+                font-style: italic;
+            }
+            .dim-reason-box {
+                margin-top: 8px;
+                padding: 8px 10px;
+                border-radius: 6px;
+                background: var(--primary-light);
+                border-left: 3px solid var(--primary);
+                font-size: 12px;
                 color: var(--text-sub);
+                line-height: 1.6;
                 word-break: break-word;
             }
+            .dim-reason-box:empty {
+                display: none;
+            }
 
-            .tag {
-                display: inline-block;
-                padding: 1px 10px;
-                border-radius: 10px;
-                font-size: 12px;
-                font-weight: 600;
+            /* ===== 整体结论高亮卡片 ===== */
+            .overall-card {
+                margin-top: 14px;
+                padding: 14px 16px;
+                border-radius: 8px;
+                background: linear-gradient(135deg, #f0f5ff 0%, #f5f6fa 100%);
+                border: 1px solid #d6e4ff;
             }
-            .tag.qualified {
-                background: var(--qualified-bg);
-                color: var(--qualified-text);
+            .overall-label {
+                font-size: 11px;
+                color: var(--primary);
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                margin-bottom: 6px;
             }
-            .tag.unqualified {
-                background: var(--unqualified-bg);
-                color: var(--unqualified-text);
+            .overall-value {
+                font-size: 15px;
+                font-weight: 700;
+                color: var(--primary);
+                margin-bottom: 8px;
+                word-break: break-word;
             }
-            .tag.defect {
-                background: var(--defect-bg);
-                color: var(--defect-text);
-            }
-            .tag.unknown {
-                background: #f2f3f5;
+            .overall-value.na {
                 color: var(--text-light);
+                font-weight: 400;
+                font-style: italic;
+                font-size: 13px;
             }
-
-            .issue-tags {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 4px;
-            }
-            .issue-tag {
-                display: inline-block;
-                padding: 1px 8px;
-                border-radius: 4px;
+            .overall-reason {
+                padding: 10px 12px;
+                border-radius: 6px;
+                background: rgba(255, 255, 255, 0.7);
                 font-size: 12px;
-                background: #f2f3f5;
                 color: var(--text-sub);
+                line-height: 1.6;
+                word-break: break-word;
+            }
+            .overall-reason:empty {
+                display: none;
             }
 
             .empty {
@@ -230,7 +293,10 @@
             .parse-warn {
                 font-size: 12px;
                 color: #ff7d00;
-                margin-top: 4px;
+                margin-top: 8px;
+                padding: 8px 10px;
+                background: #fff7e8;
+                border-radius: 6px;
             }
 
             @media (max-width: 768px) {
@@ -253,6 +319,9 @@
                 }
                 .main {
                     padding: 16px;
+                }
+                .dim-grid {
+                    grid-template-columns: 1fr;
                 }
             }
         </style>
@@ -283,13 +352,14 @@
         </div>
 
         <script>
-            const QUALIFIED_MAP = {
-                qualified: { label: '合格', cls: 'qualified' },
-                unqualified: { label: '不合格', cls: 'unqualified' },
-                defect: { label: '瑕疵', cls: 'defect' }
-            }
+            const DIMENSIONS = [
+                { key: 'promptCompliance', label: '可见 Prompt 符合度' },
+                { key: 'layoutHierarchy', label: '布局层级' },
+                { key: 'colorTypography', label: '色彩排版' },
+                { key: 'assetRendering', label: '素材渲染' },
+                { key: 'consistency', label: '一致性' }
+            ]
 
-            // ========== 防抖：避免粘贴大JSON时频繁触发中间态解析 ==========
             let debounceTimer = null
             document
                 .getElementById('jsonInput')
@@ -298,27 +368,21 @@
                     debounceTimer = setTimeout(parseAndRender, 150)
                 })
 
-            // ========== 粘贴并展示（从剪贴板读取） ==========
             async function pasteAndRender() {
                 const inputEl = document.getElementById('jsonInput')
                 const statusEl = document.getElementById('statusEl')
                 const btn = document.getElementById('pasteBtn')
-
                 try {
-                    if (!navigator.clipboard || !navigator.clipboard.readText) {
+                    if (!navigator.clipboard || !navigator.clipboard.readText)
                         throw new Error('当前环境不支持 Clipboard API')
-                    }
                     const text = await navigator.clipboard.readText()
                     if (!text || !text.trim()) {
                         statusEl.textContent = '⚠️ 剪贴板为空'
                         statusEl.className = 'status err'
                         return
                     }
-                    // 赋值会触发 input 事件，经防抖后自动解析，无需手动调用 parseAndRender
                     inputEl.value = text.trim()
-                    // 手动触发一次 input 事件确保立即解析（绕过防抖延迟）
                     inputEl.dispatchEvent(new Event('input'))
-
                     btn.textContent = '✅ 已粘贴'
                     setTimeout(() => {
                         btn.textContent = '📋 粘贴并展示'
@@ -330,7 +394,59 @@
                 }
             }
 
-            // ========== 解析并渲染 ==========
+            function getField(obj, key) {
+                if (!obj || typeof obj !== 'object') return undefined
+                return (
+                    obj[key] ??
+                    obj[key.charAt(0).toUpperCase() + key.slice(1)] ??
+                    obj[key.toUpperCase()]
+                )
+            }
+
+            function buildDimItemHtml(data, dim) {
+                const value = getField(data, dim.key)
+                const reason = getField(data, dim.key + 'Reason')
+                const hasValue =
+                    value !== undefined && value !== null && value !== ''
+                const valDisplay = hasValue
+                    ? escapeHtml(String(value))
+                    : '<span class="na">-</span>'
+                const reasonHtml =
+                    reason !== undefined && reason !== null && reason !== ''
+                        ? `<div class="dim-reason-box">${escapeHtml(String(reason))}</div>`
+                        : ''
+
+                return `
+        <div class="dim-item">
+            <div class="dim-header">
+                <span class="dim-label">${dim.label}</span>
+                <span class="dim-value ${hasValue ? '' : 'na'}">${valDisplay}</span>
+            </div>
+            ${reasonHtml}
+        </div>`
+            }
+
+            function buildOverallHtml(data) {
+                const pref = getField(data, 'overallPreference')
+                const reason = getField(data, 'overallReason')
+                const hasPref =
+                    pref !== undefined && pref !== null && pref !== ''
+                const prefDisplay = hasPref
+                    ? escapeHtml(String(pref))
+                    : '<span class="na">-</span>'
+                const reasonHtml =
+                    reason !== undefined && reason !== null && reason !== ''
+                        ? `<div class="overall-reason">${escapeHtml(String(reason))}</div>`
+                        : ''
+
+                return `
+        <div class="overall-card">
+            <div class="overall-label">整体偏序结论</div>
+            <div class="overall-value ${hasPref ? '' : 'na'}">${prefDisplay}</div>
+            ${reasonHtml}
+        </div>`
+            }
+
             function parseAndRender() {
                 const raw = document.getElementById('jsonInput').value.trim()
                 const statusEl = document.getElementById('statusEl')
@@ -343,7 +459,6 @@
                     statusEl.className = 'status'
                     return
                 }
-
                 try {
                     const json = JSON.parse(raw)
                     const answerList =
@@ -351,15 +466,13 @@
                         json.data?.AnswerList ||
                         json.Result?.AnswerList ||
                         json
-
                     if (
                         typeof answerList !== 'object' ||
                         Array.isArray(answerList)
-                    ) {
+                    )
                         throw new Error(
                             '未找到有效的 AnswerList 对象（期望格式: {题目id: [节点数组]}）'
                         )
-                    }
 
                     const topicIds = Object.keys(answerList)
                     if (topicIds.length === 0) {
@@ -369,78 +482,49 @@
                         return
                     }
 
-                    let html = ''
-                    let totalNodes = 0
-                    let parseErrors = 0
-
+                    let html = '',
+                        totalNodes = 0,
+                        parseErrors = 0
                     topicIds.forEach((topicId) => {
                         const nodes = answerList[topicId]
                         if (!Array.isArray(nodes)) return
-
                         let nodesHtml = ''
                         nodes.forEach((node) => {
                             totalNodes++
                             const nodeName = node.NodeName || '未命名节点'
-                            let parsed = null
-                            let warnMsg = ''
-
+                            let parsed = null,
+                                warnMsg = ''
                             try {
-                                if (typeof node.NodeAnswer === 'string') {
+                                if (typeof node.NodeAnswer === 'string')
                                     parsed = JSON.parse(node.NodeAnswer)
-                                } else if (
+                                else if (
                                     typeof node.NodeAnswer === 'object' &&
                                     node.NodeAnswer !== null
-                                ) {
+                                )
                                     parsed = node.NodeAnswer
-                                }
                             } catch (e) {
                                 parseErrors++
                                 warnMsg = `NodeAnswer 解析失败: ${e.message}`
                             }
 
                             const data = parsed?.data || parsed?.Data || {}
-                            const isQualified = String(
-                                data.isQualified || data.IsQualified || ''
-                            ).toLowerCase()
-                            const issueTypes =
-                                data.issueTypes || data.IssueTypes || []
-                            const remark = data.remark || data.Remark || ''
-
-                            const qInfo = QUALIFIED_MAP[isQualified] || {
-                                label: isQualified || '未知',
-                                cls: 'unknown'
-                            }
-                            const issuesHtml =
-                                Array.isArray(issueTypes) &&
-                                issueTypes.length > 0
-                                    ? `<div class="issue-tags">${issueTypes.map((t) => `<span class="issue-tag">${escapeHtml(String(t))}</span>`).join('')}</div>`
-                                    : '<span style="color:var(--text-light)">-</span>'
+                            const dimsHtml = DIMENSIONS.map((dim) =>
+                                buildDimItemHtml(data, dim)
+                            ).join('')
+                            const overallHtml = buildOverallHtml(data)
 
                             nodesHtml += `
                     <div class="node-card">
                         <div class="node-name">${escapeHtml(nodeName)}</div>
-                        <div class="field-row">
-                            <span class="field-label">是否合格</span>
-                            <span class="tag ${qInfo.cls}">${escapeHtml(qInfo.label)}</span>
-                        </div>
-                        <div class="field-row">
-                            <span class="field-label">问题类型</span>
-                            <span class="field-value">${issuesHtml}</span>
-                        </div>
-                        <div class="field-row">
-                            <span class="field-label">理由</span>
-                            <span class="field-value">${remark ? escapeHtml(remark) : '<span style="color:var(--text-light)">-</span>'}</span>
-                        </div>
+                        <div class="section-title">维度评估</div>
+                        <div class="dim-grid">${dimsHtml}</div>
+                        <div class="section-title">整体结论</div>
+                        ${overallHtml}
                         ${warnMsg ? `<div class="parse-warn">⚠️ ${escapeHtml(warnMsg)}</div>` : ''}
                     </div>`
                         })
-
                         if (nodesHtml) {
-                            html += `
-                    <div class="topic-group">
-                        <div class="topic-title">题目 ${escapeHtml(topicId)}</div>
-                        ${nodesHtml}
-                    </div>`
+                            html += `<div class="topic-group"><div class="topic-title">题目 ${escapeHtml(topicId)}</div>${nodesHtml}</div>`
                         }
                     })
 
@@ -452,7 +536,6 @@
                     statusEl.textContent = msg
                     statusEl.className = 'status'
                 } catch (e) {
-                    // 输入过程中JSON不完整是正常现象，仅在内容非空时提示错误
                     statusEl.textContent = `❌ ${e.message}`
                     statusEl.className = 'status err'
                     outputEl.innerHTML = ''
@@ -464,12 +547,10 @@
                 d.textContent = str
                 return d.innerHTML
             }
-
             function clearAll() {
-                const inputEl = document.getElementById('jsonInput')
-                inputEl.value = ''
-                // 清空后触发 input 事件，让 parseAndRender 重置右侧为初始状态
-                inputEl.dispatchEvent(new Event('input'))
+                const el = document.getElementById('jsonInput')
+                el.value = ''
+                el.dispatchEvent(new Event('input'))
             }
         </script>
     </body>
